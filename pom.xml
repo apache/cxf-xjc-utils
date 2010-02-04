@@ -1,0 +1,469 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements. See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership. The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License. You may obtain a copy of the License at
+ 
+  http://www.apache.org/licenses/LICENSE-2.0
+ 
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.apache.cxf.xjc-utils</groupId>
+    <artifactId>xjc-utils</artifactId>
+    <packaging>pom</packaging>
+    <version>2.3.0-SNAPSHOT</version>
+    <name>Apache CXF XJC Utils</name>
+    <url>http://cxf.apache.org</url>
+
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>7</version>
+    </parent>
+
+    <properties>
+        <jaxb.version>2.1</jaxb.version>
+        <jaxb.xjc.version>2.1.12</jaxb.xjc.version>
+        <jaxb.impl.version>2.1.12</jaxb.impl.version>
+
+        <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
+        <downloadSources>true</downloadSources>
+
+        <pmd.eclipse.ruleset>cxf-pmd-ruleset.xml</pmd.eclipse.ruleset>
+        <resources.base.path/>
+        <checkstyle.extension/>
+    </properties>
+
+    <modules>
+        <module>xsd</module>
+        <module>dv</module>
+        <module>dv-test</module>
+        <module>ts</module>
+        <module>ts-test</module>
+        <module>boolean</module>
+        <module>boolean-test</module>
+        <module>wsdlextension</module>
+        <module>wsdlextension-test</module>
+        <module>bug671</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>2.1.12</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-xjc</artifactId>
+                <version>2.1.12</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.7</version>
+            </dependency>
+            <dependency>
+                <groupId>jaxme</groupId>
+                <artifactId>jaxme2</artifactId>
+                <version>0.5.1</version>
+            </dependency>
+            <!--
+    [2]  'dependencies.dependency.version' is missing for org.apache.geronimo.specs:geronimo-activation_1.1_spec:jar
+    [3]  'dependencies.dependency.version' is missing for org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:jar
+    [4]  'dependencies.dependency.artifactId' with value '${stax.impl.artifactId}' does not match a valid id pattern.
+    [5]  'dependencies.dependency.groupId' with value '${stax.impl.groupId}' does not match a valid id pattern.
+    [6]  'dependencies.dependency.version' is missing for ${stax.impl.groupId}:${stax.impl.artifactId}:jar
+-->
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-plugin-api</artifactId>
+                <version>2.0.9</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-project</artifactId>
+                <version>2.0.9</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>wsdl4j</groupId>
+                <artifactId>wsdl4j</artifactId>
+                <version>1.6.2</version>
+            </dependency>
+
+            <!--dependency>
+                <groupId></groupId>
+                <artifactId></artifactId>
+                <version></version>
+            </dependency>
+            <dependency>
+                <groupId></groupId>
+                <artifactId></artifactId>
+                <version></version>
+            </dependency>
+            <dependency>
+                <groupId></groupId>
+                <artifactId></artifactId>
+                <version></version>
+            </dependency-->
+        </dependencies>
+    </dependencyManagement>
+    <distributionManagement>
+        <site>
+            <id>apache.cxf.site</id>
+            <url>scpexe://people.apache.org/www/cxf.apache.org/cxf/mvn_site/xjc-utils</url>
+        </site>
+    </distributionManagement>
+    <inceptionYear>2006</inceptionYear>
+
+    <mailingLists>
+        <mailingList>
+            <name>Apache CXF User List</name>
+            <subscribe>users-subscribe@cxf.apache.org</subscribe>
+            <unsubscribe>users-unsubscribe@cxf.apache.org</unsubscribe>
+            <post>users@cxf.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/cxf-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>Apache CXF Developer List</name>
+            <subscribe>dev-subscribe@cxf.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@cxf.apache.org</unsubscribe>
+            <post>dev@cxf.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/cxf-dev</archive>
+        </mailingList>
+        <mailingList>
+            <name>Apache CXF Commits List</name>
+            <subscribe>commits-subscribe@cxf.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@cxf.apache.org</unsubscribe>
+            <post>commits@cxf.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/cxf-commits</archive>
+        </mailingList>
+        <mailingList>
+            <name>Apache CXF Issues List</name>
+            <subscribe>issues-subscribe@cxf.apache.org</subscribe>
+            <unsubscribe>issues-unsubscribe@cxf.apache.org</unsubscribe>
+            <post>issues@cxf.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/cxf-issues</archive>
+        </mailingList>
+        <mailingList>
+            <name>Apache CXF Build Notifications List</name>
+            <subscribe>notifications-subscribe@cxf.apache.org</subscribe>
+            <unsubscribe>notifications-unsubscribe@cxf.apache.org</unsubscribe>
+            <post>notifications@cxf.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/cxf-notifications</archive>
+        </mailingList>
+    </mailingLists>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+
+        <plugins>
+            <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-pmd-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.0-beta-9</version>
+                    <configuration>
+                        <tagBase>https://svn.apache.org/repos/asf/cxf/build-utils/tags</tagBase>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <preparationGoals>clean install</preparationGoals>
+                        <goals>deploy</goals>
+                        <arguments>-Prelease,deploy</arguments>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <attach>true</attach>
+                        <source>1.5</source>
+                        <quiet>true</quiet>
+                        <bottom>Apache CXF</bottom>
+                        <javadocVersion>1.5</javadocVersion>
+                        <encoding>UTF-8</encoding>
+                        <!--subpackages>org.apache.cxf</subpackages-->
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.0.2</version>
+                    <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                        <maxmem>256M</maxmem>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.2</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Specification-Title>${name}</Specification-Title>
+                                <Specification-Vendor>The Apache Software Foundation</Specification-Vendor>
+                                <Specification-Version>${version}</Specification-Version>
+                                <Implementation-Title>${name}</Implementation-Title>
+                                <Implementation-Vendor-Id>org.apache</Implementation-Vendor-Id>
+                                <Implementation-Vendor>The Apache Software Foundation</Implementation-Vendor>
+                                <Implementation-Version>${version}</Implementation-Version>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.2-beta-4</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>1.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>2.0.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>2.1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <outputDirectory>${eclipse.outputDirectory}</outputDirectory>
+                        <buildcommands>
+                            <java.lang.String>org.eclipse.jdt.core.javabuilder</java.lang.String>
+                            <java.lang.String>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</java.lang.String>
+                            <java.lang.String>net.sourceforge.pmd.eclipse.plugin.pmdBuilder</java.lang.String>
+                        </buildcommands>
+                        <projectnatures>
+                            <nature>org.eclipse.jdt.core.javanature</nature>
+                            <nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
+                            <nature>net.sourceforge.pmd.eclipse.plugin.pmdNature</nature>
+                        </projectnatures>
+                        <ajdtVersion>none</ajdtVersion>
+                        <additionalConfig>
+                            <file>
+                                <name>.checkstyle</name>
+                                <location>/cxf-eclipse-checkstyle${checkstyle.extension}</location>
+                            </file>
+                            <file>
+                                <name>.pmd</name>
+                                <location>/cxf-eclipse-pmd</location>
+                            </file>
+                            <file>
+                                <name>.ruleset</name>
+                                <location>/${pmd.eclipse.ruleset}</location>
+                            </file>
+                        </additionalConfig>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.cxf.build-utils</groupId>
+                            <artifactId>cxf-buildtools</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.3</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.cxf.build-utils</groupId>
+                            <artifactId>cxf-buildtools</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.codehaus.plexus</groupId>
+                            <artifactId>plexus-velocity</artifactId>
+                            <version>1.1.3</version>
+                            <exclusions>
+                                <exclusion>
+                                    <!-- Use the version specified by checkstyle:checkstyle instead -->
+                                    <artifactId>commons-collections</artifactId>
+                                    <groupId>commons-collections</groupId>
+                                </exclusion>
+                                <exclusion>
+                                    <artifactId>plexus-utils</artifactId>
+                                    <groupId>plexus</groupId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <configuration>
+                                <configLocation>${resources.base.path}cxf-checkstyle${checkstyle.extension}.xml</configLocation>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <linkXRef>false</linkXRef>
+                                <suppressionsLocation>${resources.base.path}cxf-checkstyle-suppressions.xml</suppressionsLocation>
+                                <sourceDirectory>${basedir}/src</sourceDirectory>
+                                <excludes>**/archetype-resources/**/*.java</excludes>
+                            </configuration>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>2.4</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.cxf.build-utils</groupId>
+                            <artifactId>cxf-buildtools</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <rulesets>
+                            <ruleset>${resources.base.path}cxf-pmd-ruleset.xml</ruleset>
+                            <ruleset>${resources.base.path}cxf-pmd-custom.xml</ruleset>
+                        </rulesets>
+                        <sourceEncoding>UTF-8</sourceEncoding>
+                        <targetJdk>1.5</targetJdk>
+                        <linkXRef>false</linkXRef>
+                        <includeTests>true</includeTests>
+                        <verbose>true</verbose>
+                        <excludeRoots>
+                            <excludeRoot>${basedir}/src/main/generated</excludeRoot>
+                        </excludeRoots>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>fastinstall</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <pmd.skip>true</pmd.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>nochecks</id>
+            <properties>
+                <pmd.skip>true</pmd.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>
+
