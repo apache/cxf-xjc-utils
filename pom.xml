@@ -56,7 +56,19 @@
         <module>wsdlextension-test</module>
         <module>bug671</module>
     </modules>
-
+    <repositories>
+         <repository>
+             <id>apache.snapshots</id>
+             <url>http://repository.apache.org/snapshots/</url>
+             <name>Apache Snapshot Repo</name>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository> 
+    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -84,13 +96,6 @@
                 <artifactId>jaxme2</artifactId>
                 <version>0.5.1</version>
             </dependency>
-            <!--
-    [2]  'dependencies.dependency.version' is missing for org.apache.geronimo.specs:geronimo-activation_1.1_spec:jar
-    [3]  'dependencies.dependency.version' is missing for org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:jar
-    [4]  'dependencies.dependency.artifactId' with value '${stax.impl.artifactId}' does not match a valid id pattern.
-    [5]  'dependencies.dependency.groupId' with value '${stax.impl.groupId}' does not match a valid id pattern.
-    [6]  'dependencies.dependency.version' is missing for ${stax.impl.groupId}:${stax.impl.artifactId}:jar
--->
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
@@ -111,22 +116,6 @@
                 <artifactId>wsdl4j</artifactId>
                 <version>1.6.2</version>
             </dependency>
-
-            <!--dependency>
-                <groupId></groupId>
-                <artifactId></artifactId>
-                <version></version>
-            </dependency>
-            <dependency>
-                <groupId></groupId>
-                <artifactId></artifactId>
-                <version></version>
-            </dependency>
-            <dependency>
-                <groupId></groupId>
-                <artifactId></artifactId>
-                <version></version>
-            </dependency-->
         </dependencies>
     </dependencyManagement>
     <distributionManagement>
