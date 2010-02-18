@@ -43,6 +43,7 @@ import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JOp;
 import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JType;
+import com.sun.codemodel.JVar;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
@@ -337,7 +338,6 @@ public class DefaultValuePlugin {
             LOG.fine("Updating getter: " + getterName);
         }
         // remove existing method and define new one
-
         dc.methods().remove(method);
 
         method = dc.method(mods, mtype, getterName);
@@ -376,10 +376,10 @@ public class DefaultValuePlugin {
         method = dc.method(mods, method.type(), setterName);
         
         method.javadoc().append(doc);
-        method.param(mtype, "value");
+        JVar var = method.param(mtype, "value");
 
         JFieldRef fr = JExpr.ref(fieldName);
-        method.body().assign(fr, JExpr.ref("value"));
+        method.body().assign(fr, var);
         
         method = dc.method(mods, method.type(), "unset" + fo.getPropertyInfo().getName(true));
         method.body().assign(fr, JExpr._null());
