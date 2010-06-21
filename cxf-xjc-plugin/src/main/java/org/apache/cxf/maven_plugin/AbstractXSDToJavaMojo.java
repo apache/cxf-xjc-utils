@@ -21,7 +21,11 @@ package org.apache.cxf.maven_plugin;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -119,6 +123,37 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     abstract String getOutputDir();
     
+    
+    private URI mapLocation(String s) throws MojoExecutionException {
+        try {
+            File file = new File(s);
+            URI uri;
+            if (file.exists()) {
+                uri = file.toURI();
+            } else {
+                file = new File(project.getBasedir(), s);
+                if (file.exists()) {
+                    uri = file.toURI();
+                } else {
+                    uri = new URI(s);
+                }
+            }
+            if ("classpath".equals(uri.getScheme())) {
+                URL url = Thread.currentThread().getContextClassLoader()
+                    .getResource(s.substring(10));
+                if (url == null) {
+                    url = Thread.currentThread().getContextClassLoader()
+                        .getResource(s.substring(11));
+                }
+                if (url != null) {
+                    uri = url.toURI();
+                }
+            }
+            return uri;
+        } catch (URISyntaxException e1) {
+            throw new MojoExecutionException("Could not map " + s, e1);
+        }
+    }
     public void execute() throws MojoExecutionException {
         String outputDir = getOutputDir();
         
@@ -131,85 +166,82 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (xsdOptions == null) {
             throw new MojoExecutionException("Must specify xsdOptions");           
         }
-        
     
         for (int x = 0; x < xsdOptions.length; x++) {
-            String[] args = getArguments(xsdOptions[x], outputDir);
-            
-            String xsdLocation = xsdOptions[x].getXsd();
-            File xsdFile = new File(xsdLocation);
-            URI basedir = project.getBasedir().toURI();
-            URI xsdURI;
-            if (xsdFile.exists()) {
-                xsdURI = xsdFile.toURI();
-            } else {
-                xsdURI = basedir.resolve(xsdLocation);
-            }
-            
-            String doneFileName = xsdURI.toString();
-            if (doneFileName.startsWith(basedir.toString())) {
-                doneFileName = doneFileName.substring(basedir.toString().length());
-            }
-            
-            doneFileName = doneFileName.replace('?', '_')
-                .replace('&', '_').replace('/', '_').replace('\\', '_');
-            
-            // If URL to WSDL, replace ? and & since they're invalid chars for file names
-            File doneFile =
-                new File(markerDirectory, "." + doneFileName + ".DONE");
-            
-            long srctimestamp = 0;
-            if ("file".equals(xsdURI.getScheme())) {
-                srctimestamp = new File(xsdURI).lastModified();
-            } else {
-                try {
-                    srctimestamp = xsdURI.toURL().openConnection().getDate();
-                } catch (Exception e) {
-                    //ignore
+            ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+            try {
+                String[] args = getArguments(xsdOptions[x], outputDir);
+                URI xsdURI = mapLocation(xsdOptions[x].getXsd());
+                URI basedir = project.getBasedir().toURI();
+                
+                String doneFileName = xsdURI.toString();
+                if (doneFileName.startsWith(basedir.toString())) {
+                    doneFileName = doneFileName.substring(basedir.toString().length());
                 }
-            }
-            
-            boolean doWork = false;
-            if (!doneFile.exists()) {
-                doWork = true;
-            } else if (srctimestamp > doneFile.lastModified()) {
-                doWork = true;
-            } else {
-                File files[] = xsdOptions[x].getDependencies();
-                if (files != null) {
-                    for (int z = 0; z < files.length; ++z) {
-                        if (files[z].lastModified() > doneFile.lastModified()) {
-                            doWork = true;
+                
+                doneFileName = doneFileName.replace('?', '_')
+                    .replace('&', '_').replace('/', '_').replace('\\', '_');
+                
+                // If URL to WSDL, replace ? and & since they're invalid chars for file names
+                File doneFile =
+                    new File(markerDirectory, "." + doneFileName + ".DONE");
+                
+                long srctimestamp = 0;
+                if ("file".equals(xsdURI.getScheme())) {
+                    srctimestamp = new File(xsdURI).lastModified();
+                } else {
+                    try {
+                        srctimestamp = xsdURI.toURL().openConnection().getDate();
+                    } catch (Exception e) {
+                        //ignore
+                    }
+                }
+                
+                boolean doWork = false;
+                if (!doneFile.exists()) {
+                    doWork = true;
+                } else if (srctimestamp > doneFile.lastModified()) {
+                    doWork = true;
+                } else {
+                    File files[] = xsdOptions[x].getDependencies();
+                    if (files != null) {
+                        for (int z = 0; z < files.length; ++z) {
+                            if (files[z].lastModified() > doneFile.lastModified()) {
+                                doWork = true;
+                            }
                         }
                     }
                 }
-            }
-            
-            if (doWork) {
-                try {
-                    int i = com.sun.tools.xjc.Driver.run(args, System.out, System.err);
-                    if (i == 0) {
-                        doneFile.delete();
-                        doneFile.createNewFile();
-                    }
-                    File dirs[] = xsdOptions[x].getDeleteDirs();
-                    if (dirs != null) {
-                        for (int idx = 0; idx < dirs.length; ++idx) {
-                            result = result && deleteDir(dirs[idx]);
+                
+                if (doWork) {
+                    try {
+                        int i = com.sun.tools.xjc.Driver.run(args, System.out, System.err);
+                        if (i == 0) {
+                            doneFile.delete();
+                            doneFile.createNewFile();
                         }
+                        File dirs[] = xsdOptions[x].getDeleteDirs();
+                        if (dirs != null) {
+                            for (int idx = 0; idx < dirs.length; ++idx) {
+                                result = result && deleteDir(dirs[idx]);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new MojoExecutionException(e.getMessage(), e);
                     }
-                } catch (Exception e) {
-                    throw new MojoExecutionException(e.getMessage(), e);
                 }
+            
+                if (!result) {
+                    throw new MojoExecutionException("Could not delete redundant dirs");
+                }  
+            } finally {
+                Thread.currentThread().setContextClassLoader(origLoader);
             }
-        
-            if (!result) {
-                throw new MojoExecutionException("Could not delete redundant dirs");
-            }                
         }
     }
     
     private String[] getArguments(XsdOption option, String outputDir) throws MojoExecutionException {
+        List<URL> newCp = new ArrayList<URL>();
         List<String> list = new ArrayList<String>();
         if (extensions != null && extensions.size() > 0) {
             Set<Artifact> artifacts = new HashSet<Artifact>();
@@ -236,20 +268,24 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                                                  localRepository, remoteArtifactRepositories);
                     list.add("-classpath");
                     list.add(f.getAbsolutePath());
-                    
+                    newCp.add(f.toURI().toURL());
                 }
             } catch (Exception ex) {
                 throw new MojoExecutionException("Could not download extension artifact", ex);
             }
         }
-        
+        if (!newCp.isEmpty()) {
+            Thread.currentThread()
+                .setContextClassLoader(new URLClassLoader(newCp.toArray(new URL[newCp.size()]),
+                                                          Thread.currentThread().getContextClassLoader()));
+        }
         if (option.getPackagename() != null) {
             list.add("-p");
             list.add(option.getPackagename());
         }
         if (option.getBindingFile() != null) {
             list.add("-b");
-            list.add(option.getBindingFile());
+            list.add(mapLocation(option.getBindingFile()).toString());
         }
         if (option.getCatalog() != null) {
             list.add("-catalog");
@@ -271,7 +307,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         list.add("-d");
         list.add(outputDir);
-        list.add(option.getXsd());
+        list.add(mapLocation(option.getXsd()).toString());
        
         return list.toArray(new String[list.size()]);
         
