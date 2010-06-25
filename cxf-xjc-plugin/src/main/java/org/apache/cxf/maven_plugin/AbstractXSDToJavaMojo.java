@@ -179,7 +179,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 }
                 
                 doneFileName = doneFileName.replace('?', '_')
-                    .replace('&', '_').replace('/', '_').replace('\\', '_');
+                    .replace('&', '_').replace('/', '_').replace('\\', '_')
+                    .replace(':', '_').replace('!', '_');
                 
                 // If URL to WSDL, replace ? and & since they're invalid chars for file names
                 File doneFile =
