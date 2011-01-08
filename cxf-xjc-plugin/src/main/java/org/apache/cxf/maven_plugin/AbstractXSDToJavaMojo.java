@@ -250,6 +250,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 for (String ext : extensions) {
                     String[] s = ext.split(":");
                     
+                    if (s.length != 3) {
+                        throw new MojoExecutionException("Extension should be defined as"
+                                                         + " groupId:artifactId:version. "
+                                                         + ext + " does not meet that pattern.");
+                    }
                     
                     Artifact artifact = artifactFactory.createBuildArtifact(s[0], s[1], s[2], "jar");
                     artifacts.add(artifact);
@@ -270,6 +275,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     list.add(f.getAbsolutePath());
                     newCp.add(f.toURI().toURL());
                 }
+            } catch (MojoExecutionException mojo) {
+                throw mojo;
             } catch (Exception ex) {
                 throw new MojoExecutionException("Could not download extension artifact", ex);
             }
