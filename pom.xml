@@ -39,10 +39,6 @@
     <properties>
         <jdk.version>1.6</jdk.version>
 
-        <jaxb.version>2.1</jaxb.version>
-        <jaxb.xjc.version>2.1.12</jaxb.xjc.version>
-        <jaxb.impl.version>2.1.12</jaxb.impl.version>
-
         <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
         <downloadSources>true</downloadSources>
 
@@ -87,12 +83,12 @@
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
-                <version>2.1.12</version>
+                <version>2.1.13</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-xjc</artifactId>
-                <version>2.1.12</version>
+                <version>2.1.13</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -233,11 +229,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.5</version>
+                    <configuration>
+                        <reportFormat>brief</reportFormat>
+                        <useFile>false</useFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.0.2</version>
+                    <version>2.1</version>
                     <configuration>
                         <source>1.5</source>
                         <target>1.5</target>
@@ -294,7 +294,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>2.0.1</version>
+                    <version>3.0-beta-3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -309,7 +309,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>2.1.1</version>
+                    <version>2.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -319,7 +319,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>2.8</version>
                     <configuration>
                         <outputDirectory>${eclipse.outputDirectory}</outputDirectory>
                         <buildcommands>
@@ -352,19 +352,19 @@
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.3.0</version>
+                            <version>2.3.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>2.6</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.3.0</version>
+                            <version>2.3.1</version>
                         </dependency>
                     </dependencies>
                     <configuration>
@@ -397,7 +397,7 @@
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.3.0</version>
+                            <version>2.3.1</version>
                         </dependency>
                     </dependencies>
                     <configuration>

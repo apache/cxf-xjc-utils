@@ -52,9 +52,9 @@
         <xs:sequence>
 	    <xs:element name="pageColor" type="tns:pageColor" minOccurs="0"></xs:element>
             <xs:element name="driving" type="tns:drivingDecision" default="LeftTurn" minOccurs="0"></xs:element>
-            <xs:element name="stringElem" type="xs:string" default="hello" minOccurs="0"></xs:element>
-            <xs:element name="booleanElem" type="xs:boolean" default="true" minOccurs="0"></xs:element>
-            <xs:element name="integerElem" type="xs:integer" default="11" minOccurs="0"></xs:element>
+            <xs:element name="StringElem" type="xs:string" default="hello" minOccurs="0"></xs:element>
+            <xs:element name="BooleanElem" type="xs:boolean" default="true" minOccurs="0"></xs:element>
+            <xs:element name="IntegerElem" type="xs:integer" default="11" minOccurs="0"></xs:element>
             <xs:element name="intElem" type="xs:int" default="12" minOccurs="0"></xs:element>
             <xs:element name="longElem" type="xs:long" default="13" minOccurs="0"></xs:element>
             <xs:element name="shortElem" type="xs:short" default="14" minOccurs="0"></xs:element>
@@ -72,9 +72,9 @@
             <xs:element name="temperature" type="tns:celsius" default="37" minOccurs="0"></xs:element>
             <xs:element name="roomTemperature" type="tns:cel" default="38" minOccurs="0"></xs:element>
             
-            <xs:element name="point" type="tns:point" minOccurs="0"></xs:element>
+            <xs:element name="Point" type="tns:point" minOccurs="0"></xs:element>
 
-            <xs:element name="address" minOccurs="0">
+            <xs:element name="Address" minOccurs="0">
             <xs:complexType>
                 <xs:sequence>
                     <xs:element name="city" type="xs:string"></xs:element>
@@ -125,8 +125,8 @@
     
     <xs:complexType name="point">
         <xs:sequence>
-            <xs:element name="x" type="xs:int"></xs:element>
-            <xs:element name="y" type="xs:int"></xs:element>
+            <xs:element name="X" type="xs:int" default="0" minOccurs="0"></xs:element>
+            <xs:element name="Y" type="xs:int" default="0" minOccurs="0"></xs:element>
         </xs:sequence>
     </xs:complexType>    
         

@@ -136,13 +136,7 @@ public class DefaultValuePlugin {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null) {
-                        co.implClass.removeField(var);
-
-                        JFieldVar newVar = co.implClass.field(var.mods().getValue(), 
-                                                              var.type(), 
-                                                              var.name(), 
-                                                              JExpr._new(f.getRawType()));
-                        newVar.javadoc().append(var.javadoc());
+                        var.init(JExpr._new(f.getRawType()));
                     }
                 }
 

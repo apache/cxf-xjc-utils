@@ -19,10 +19,12 @@
 
 package org.apache.cxf.xjc.dv;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.namespace.QName;
 
@@ -43,10 +45,16 @@ public class DefaultValueTest extends Assert {
         Foo foo = new org.apache.cxf.configuration.foo.ObjectFactory().createFoo();
 
         // verify default values
+        checkCXF3131(foo);
 
         assertAttributeValuesWithoutDefault(foo);
         assertDefaultAttributeValues(foo);        
         assertDefaultElementValues(foo);   
+    }
+
+    private void checkCXF3131(Foo foo) throws Exception {
+        Field f = foo.getClass().getDeclaredField("point");
+        assertNotNull(f.getAnnotation(XmlElement.class));
     }
 
     private void assertDefaultAttributeValues(Foo foo) {
