@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>7</version>
+        <version>8</version>
     </parent>
     <scm>
       <connection>scm:svn:http://svn.apache.org/repos/asf/cxf/xjc-utils/trunk</connection>
@@ -207,7 +207,7 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
-                        <arguments>-Prelease,deploy</arguments>
+                        <arguments>-Prelease,deploy,apache-release</arguments>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
                 </plugin>
