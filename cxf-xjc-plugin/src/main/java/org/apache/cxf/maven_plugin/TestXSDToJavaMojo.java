@@ -25,6 +25,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal xsdtojava-tests
  * @phase generate-test-sources
  * @description CXF XSD To Java Tool
+ * @threadSafe
  */
 public class TestXSDToJavaMojo extends AbstractXSDToJavaMojo {    
     /**
