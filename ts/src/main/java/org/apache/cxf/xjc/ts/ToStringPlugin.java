@@ -46,7 +46,7 @@ public class ToStringPlugin {
     private static final Logger LOG = Logger.getLogger(ToStringPlugin.class.getName()); //NOPMD
 
     private String styleFieldName = "DEFAULT_STYLE";
-    private String styleClassName = "org.apache.cxf.jaxb.JAXBToStringStyle";
+    private String styleClassName = "org.apache.cxf.xjc.runtime.JAXBToStringStyle";
     private boolean active;
     
     public String getOptionName() {
@@ -55,11 +55,14 @@ public class ToStringPlugin {
 
     public String getUsage() {
         return "  -Xts                 : Activate plugin to add a toString() method to generated classes\n"
-            +  "         equivalent to: -Xts:style:org.apache.cxf.jaxb.JAXBToStringStyle.DEFAULT_STYLE\n"
+            +  "         equivalent to: " 
+            +  "-Xts:style:org.apache.cxf.xjc.runtime.JAXBToStringStyle.DEFAULT_STYLE\n"
             +  "  -Xts:style:multiline : Have toString produce multi line output\n"
-            +  "         equivalent to: -Xts:style:org.apache.cxf.jaxb.JAXBToStringStyle.MULTI_LINE_STYLE\n"
+            +  "         equivalent to: " 
+            +  "-Xts:style:org.apache.cxf.xjc.runtime.JAXBToStringStyle.MULTI_LINE_STYLE\n"
             +  "  -Xts:style:simple    : Have toString produce single line terse output\n"
-            +  "         equivalent to: -Xts:style:org.apache.cxf.jaxb.JAXBToStringStyle.SIMPLE_STYLE\n"
+            +  "         equivalent to: "
+            +  "-Xts:style:org.apache.cxf.xjc.runtime.JAXBToStringStyle.SIMPLE_STYLE\n"
             +  "  -Xts:style:org.apache.commons.lang.builder.ToStringStyle.FIELD : The full class+field\n"
             +  "         name of the ToStringStyle to use.";
     }

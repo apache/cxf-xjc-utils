@@ -59,6 +59,7 @@
         <module>wsdlextension-test</module>
         <module>bug671</module>
         <module>property-listener</module>
+        <module>runtime</module>
     </modules>
     <repositories>
          <repository>
