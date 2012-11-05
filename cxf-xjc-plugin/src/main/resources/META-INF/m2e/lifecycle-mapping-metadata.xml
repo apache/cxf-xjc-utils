@@ -1,0 +1,31 @@
+<lifecycleMappingMetadata>
+  <pluginExecutions>
+      <pluginExecution>
+          <pluginExecutionFilter>
+              <goals>
+                  <goal>xsdtojava</goal>
+              </goals>
+          </pluginExecutionFilter>
+          <action>
+              <execute>
+                  <runOnIncremental>true</runOnIncremental>
+                  <runOnConfiguration>true</runOnConfiguration>
+              </execute>
+          </action>
+      </pluginExecution>
+      <pluginExecution>
+          <pluginExecutionFilter>
+              <goals>
+                  <goal>xsdtojava-tests</goal>
+              </goals>
+          </pluginExecutionFilter>
+          <action>
+              <execute>
+                  <runOnIncremental>true</runOnIncremental>
+                  <runOnConfiguration>true</runOnConfiguration>
+              </execute>
+          </action>
+      </pluginExecution>
+  </pluginExecutions>
+</lifecycleMappingMetadata>
+

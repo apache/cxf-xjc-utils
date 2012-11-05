@@ -39,6 +39,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.shared.downloader.Downloader;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * @description CXF XSD To Java Tool
@@ -119,6 +120,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
      */
     private ArtifactFactory artifactFactory;
 
+    
+    /** @component */
+    private BuildContext buildContext;
+            
     
     abstract String getOutputDir();
     
@@ -226,6 +231,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                                 result = result && deleteDir(dirs[idx]);
                             }
                         }
+                        buildContext.refresh(outputDirFile);
                     } catch (Exception e) {
                         throw new MojoExecutionException(e.getMessage(), e);
                     }
