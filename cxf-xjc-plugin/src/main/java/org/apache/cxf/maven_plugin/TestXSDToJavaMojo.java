@@ -36,11 +36,10 @@ public class TestXSDToJavaMojo extends AbstractXSDToJavaMojo {
     
 
     public void execute() throws MojoExecutionException {
-        super.execute();
-        
         if (project != null && testSourceRoot != null) {
             project.addTestCompileSourceRoot(testSourceRoot);
         }
+        super.execute();
     }
 
 

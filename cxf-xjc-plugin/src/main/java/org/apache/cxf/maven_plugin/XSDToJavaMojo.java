@@ -36,10 +36,10 @@ public class XSDToJavaMojo extends AbstractXSDToJavaMojo {
     
 
     public void execute() throws MojoExecutionException {
-        super.execute();
         if (project != null && sourceRoot != null) {
             project.addCompileSourceRoot(sourceRoot);
         }
+        super.execute();
     }
 
 

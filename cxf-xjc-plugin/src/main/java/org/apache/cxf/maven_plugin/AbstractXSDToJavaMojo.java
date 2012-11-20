@@ -30,6 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.xml.sax.SAXParseException;
+
+import com.sun.tools.xjc.XJCListener;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -128,6 +132,65 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     abstract String getOutputDir();
     
     
+    
+    class Listener extends XJCListener {
+        private final List<File> errorfiles;
+
+        Listener(List<File> errorfiles) {
+            this.errorfiles = errorfiles;
+        }
+
+        public void error(SAXParseException exception) {
+            File file = mapFile(exception.getSystemId());
+            if (file != null && !errorfiles.contains(file)) {
+                buildContext.removeMessages(file);
+                errorfiles.add(file);
+            }
+            buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
+                                    mapMessage(exception.getLocalizedMessage()),
+                                    BuildContext.SEVERITY_ERROR, exception);
+
+        }
+
+        private String mapMessage(String localizedMessage) {
+            return localizedMessage;
+        }
+
+        private File mapFile(String s) {
+            File file = null;
+            if (s != null && s.startsWith("file:")) {
+                if (s.contains("#")) {
+                    s = s.substring(0, s.indexOf('#'));
+                }
+                try {
+                    URI uri = new URI(s);
+                    file = new File(uri);
+                } catch (URISyntaxException e) {
+                    //ignore
+                }
+            }
+            return file;
+        }
+
+        public void fatalError(SAXParseException exception) {
+            error(exception);
+        }
+
+        public void warning(SAXParseException exception) {
+            File file = mapFile(exception.getSystemId());
+            if (file != null && !errorfiles.contains(file)) {
+                buildContext.removeMessages(file);
+                errorfiles.add(file);
+            }
+            buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
+                                    mapMessage(exception.getLocalizedMessage()),
+                                    BuildContext.SEVERITY_WARNING, exception);
+        }
+
+        public void info(SAXParseException exception) {
+        }
+    }
+    
     private URI mapLocation(String s) throws MojoExecutionException {
         try {
             File file = new File(s);
@@ -170,6 +233,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (xsdOptions == null) {
             throw new MojoExecutionException("Must specify xsdOptions");           
         }
+        List<File> errorFiles = new ArrayList<File>();
     
         for (int x = 0; x < xsdOptions.length; x++) {
             ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
@@ -201,7 +265,16 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         //ignore
                     }
                 }
-                
+                if (xsdOptions[x].getBindingFile() != null) { 
+                    URI bindingURI = mapLocation(xsdOptions[x].getBindingFile());
+                    if ("file".equals(bindingURI.getScheme())) {
+                        long bts = new File(bindingURI).lastModified();
+                        if (bts > srctimestamp) {
+                            srctimestamp = bts;
+                        }
+                    }
+                }
+
                 boolean doWork = false;
                 if (!doneFile.exists()) {
                     doWork = true;
@@ -220,7 +293,18 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 
                 if (doWork) {
                     try {
-                        int i = com.sun.tools.xjc.Driver.run(args, System.out, System.err);
+                        File files[] = xsdOptions[x].getDependencies();
+                        if (files != null) {
+                            for (int z = 0; z < files.length; ++z) {
+                                if (files[z].lastModified() > doneFile.lastModified()) {
+                                    buildContext.removeMessages(files[z]);
+                                }
+                            }
+                        }
+                        removeMessages(xsdOptions[x].getXsd());
+                        removeMessages(xsdOptions[x].getBindingFile());
+                        
+                        int i = com.sun.tools.xjc.Driver.run(args, new Listener(errorFiles));
                         if (i == 0) {
                             doneFile.delete();
                             doneFile.createNewFile();
@@ -246,6 +330,18 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     
+    private void removeMessages(String file) throws MojoExecutionException {
+        if (file == null) {
+            return;
+        }
+        URI location = mapLocation(file);
+        if ("file".equals(location.getScheme())) {
+            File f = new File(location);
+            if (f.exists()) {
+                buildContext.removeMessages(f);
+            }
+        }        
+    }
     private String[] getArguments(XsdOption option, String outputDir) throws MojoExecutionException {
         List<URL> newCp = new ArrayList<URL>();
         List<String> list = new ArrayList<String>();
