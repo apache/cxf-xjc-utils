@@ -82,6 +82,14 @@
                                 <arg>-Xbg</arg>
                             </extensionArgs>
                         </xsdOption>
+                        <xsdOption>
+                            <extension>true</extension>
+                            <xsd>${basedir}/src/test/resources/schemas/configuration/foo1.xsd</xsd>
+                            <extensionArgs>
+                                <arg>-Xbgi</arg>
+                            </extensionArgs>
+                        </xsdOption>
+
                     </xsdOptions>
                     <extensions>
                         <extension>org.apache.cxf.xjcplugins:cxf-xjc-boolean:${project.version}</extension>

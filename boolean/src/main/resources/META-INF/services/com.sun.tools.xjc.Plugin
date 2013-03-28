@@ -1,1 +1,2 @@
 com.sun.tools.xjc.addon.apache_cxf.bg.BooleanGetterPlugin
+com.sun.tools.xjc.addon.apache_cxf.bgi.BooleanGetAndIsPlugin
