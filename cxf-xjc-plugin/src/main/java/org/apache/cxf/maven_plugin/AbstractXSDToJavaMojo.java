@@ -135,9 +135,13 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     class Listener extends XJCListener {
         private final List<File> errorfiles;
-
+        private Exception firstError;
+        
         Listener(List<File> errorfiles) {
             this.errorfiles = errorfiles;
+        }
+        public Exception getFirstError() {
+            return firstError;
         }
 
         public void error(SAXParseException exception) {
@@ -185,12 +189,16 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         }
                     };
                 }
-            }                        
+            }                     
             return file;
         }
 
         public void fatalError(SAXParseException exception) {
             error(exception);
+            if (firstError == null) {
+                firstError = exception;
+                firstError.fillInStackTrace();
+            }
         }
 
         public void warning(SAXParseException exception) {
@@ -322,11 +330,15 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         removeMessages(xsdOptions[x].getXsd());
                         removeMessages(xsdOptions[x].getBindingFile());
                         
-                        int i = com.sun.tools.xjc.Driver.run(args, new Listener(errorFiles));
+                        Listener listener = new Listener(errorFiles);
+                        int i = com.sun.tools.xjc.Driver.run(args, listener);
                         if (i == 0) {
                             doneFile.delete();
                             doneFile.createNewFile();
+                        } else if (listener.getFirstError() != null) {
+                            throw listener.getFirstError();
                         }
+                        System.out.println("Result: " + i);
                         File dirs[] = xsdOptions[x].getDeleteDirs();
                         if (dirs != null) {
                             for (int idx = 0; idx < dirs.length; ++idx) {
