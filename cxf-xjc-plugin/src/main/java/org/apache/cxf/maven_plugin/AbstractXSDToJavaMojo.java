@@ -141,11 +141,13 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
 
         public void error(SAXParseException exception) {
-            File file = mapFile(exception.getSystemId());
+            final String sysId = exception.getSystemId();
+            File file = mapFile(sysId);
             if (file != null && !errorfiles.contains(file)) {
                 buildContext.removeMessages(file);
                 errorfiles.add(file);
             }
+            
             buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
                                     mapMessage(exception.getLocalizedMessage()),
                                     BuildContext.SEVERITY_ERROR, exception);
@@ -169,6 +171,21 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     //ignore
                 }
             }
+            if (file == null) {
+                //Cannot pass a null into buildContext.addMessage.  Create a pointless
+                //File object that maps to the systemId
+                if (s == null) {
+                    file = new File("null");
+                } else {
+                    final String s2 = s;
+                    file = new File(s2) {
+                        private static final long serialVersionUID = 1L;
+                        public String getAbsolutePath() {
+                            return s2;
+                        }
+                    };
+                }
+            }                        
             return file;
         }
 
@@ -188,6 +205,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
 
         public void info(SAXParseException exception) {
+            //System.out.println(mapFile(exception.getSystemId()));
         }
     }
     
