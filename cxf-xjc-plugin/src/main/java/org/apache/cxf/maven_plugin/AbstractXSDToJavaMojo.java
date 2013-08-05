@@ -338,7 +338,6 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         } else if (listener.getFirstError() != null) {
                             throw listener.getFirstError();
                         }
-                        System.out.println("Result: " + i);
                         File dirs[] = xsdOptions[x].getDeleteDirs();
                         if (dirs != null) {
                             for (int idx = 0; idx < dirs.length; ++idx) {
