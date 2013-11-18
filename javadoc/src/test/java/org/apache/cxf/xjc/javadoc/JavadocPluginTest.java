@@ -18,8 +18,6 @@
  */
 package org.apache.cxf.xjc.javadoc;
 
-
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,6 +29,7 @@ import java.util.Map;
 
 import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Driver;
+import com.sun.tools.xjc.Plugin;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,25 +44,19 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.apache.cxf.xjc.javadoc.JavadocTestHelper.containsTag;
 import static org.apache.cxf.xjc.javadoc.JavadocTestHelper.javadocContains;
-import static org.hamcrest.CoreMatchers.any;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
 /**
  * End-to-end integration test of JavadocPlugin
- * 
- * @author Dawid Pytel
  */
-public class JavadocPluginTest {
+public class JavadocPluginTest extends Assert {
 
     private static final String PACKAGE_DIR = "org/example/xjc_javadoc_plugin";
     private static final String OUTPUT_DIR = "target";
@@ -80,7 +73,12 @@ public class JavadocPluginTest {
             Driver.run(new String[] {}, System.out, System.out);
             fail("Expected xjc to fail with BadCommandLineException");
         } catch (BadCommandLineException e) {
-            assertThat(e.getOptions().getAllPlugins(), hasItem(any(JavadocPlugin.class)));
+            for (Plugin p : e.getOptions().getAllPlugins()) {
+                if (p instanceof JavadocPlugin) {
+                    return;
+                }
+            }
+            fail("Did not load plugin");
         }
     }
 
