@@ -26,7 +26,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -391,13 +390,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     artifacts.add(artifact);
                     MavenProject p = mavenProjectBuilder
                         .buildFromRepository(artifact, remoteArtifactRepositories, localRepository);
-                    Set a2 = p.createArtifacts(artifactFactory, Artifact.SCOPE_RUNTIME,
+                    @SuppressWarnings("unchecked")
+                    Set<Artifact> a2 = p.createArtifacts(artifactFactory, Artifact.SCOPE_RUNTIME,
                                                new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME));
-
-                    for (Iterator i = a2.iterator(); i.hasNext();) {
-                        Artifact a = (Artifact)i.next();
-                        artifacts.add(a);
-                    }
+                    artifacts.addAll(a2);
                 }
                 for (Artifact art : artifacts) {
                     File f = downloader.download(art.getGroupId(), art.getArtifactId(), art.getVersion(), 
@@ -433,10 +429,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             list.add("-extension");
         }
         if (option.getExtensionArgs() != null) {
-            Iterator it = option.getExtensionArgs().iterator();
-            while (it.hasNext()) {
-                list.add(it.next().toString());
-            }
+            list.addAll(option.getExtensionArgs());
         }          
         if (getLog().isDebugEnabled()) {
             list.add("-verbose");            

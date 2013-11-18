@@ -59,6 +59,7 @@
         <module>wsdlextension-test</module>
         <module>bug671</module>
         <module>property-listener</module>
+        <module>javadoc</module>
         <module>runtime</module>
     </modules>
     <repositories>
@@ -353,19 +354,19 @@
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.5.0</version>
+                            <version>2.6.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>2.9.1</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.5.0</version>
+                            <version>2.6.0</version>
                         </dependency>
                     </dependencies>
                     <configuration>
@@ -393,12 +394,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>3.0.1</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
-                            <version>2.5.0</version>
+                            <version>2.6.0</version>
                         </dependency>
                     </dependencies>
                     <configuration>

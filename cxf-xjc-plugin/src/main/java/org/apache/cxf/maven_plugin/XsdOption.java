@@ -29,7 +29,7 @@ public class XsdOption {
     File dependencies[];
     File redundantDirs[];
     boolean extension;    
-    List extensionArgs;
+    List<String> extensionArgs;
     String catalog;
     
     public String getPackagename() {
@@ -63,10 +63,10 @@ public class XsdOption {
     public File[] getDeleteDirs() {
         return redundantDirs;
     }
-    public List getExtensionArgs() {
+    public List<String> getExtensionArgs() {
         return extensionArgs;
     }
-    public void setExtensionArgs(List extensionArgs) {
+    public void setExtensionArgs(List<String> extensionArgs) {
         this.extensionArgs = extensionArgs;
     }    
     public boolean isExtension() {
