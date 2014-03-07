@@ -1,0 +1,15 @@
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+.checkstyle
+.classpath
+.pmd
+.pmdruleset
+.project
+.ruleset
+.settings/
+target/
+velocity.log
+bin/
