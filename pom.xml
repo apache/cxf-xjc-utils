@@ -31,10 +31,13 @@
         <version>8</version>
     </parent>
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/cxf/xjc-utils/trunk</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/cxf/xjc-utils/trunk</developerConnection>
-      <url>http://svn.apache.org/repos/asf/cxf/xjc-utils/trunk</url>
+      <connection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</connection>
+      <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</developerConnection>
     </scm>
+    <issueManagement>
+        <system>jira</system>
+        <url>https://issues.apache.org/jira/browse/CXF</url>
+    </issueManagement>
 
     <properties>
         <jdk.version>1.6</jdk.version>
