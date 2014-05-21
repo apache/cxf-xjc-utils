@@ -154,7 +154,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
                                     mapMessage(exception.getLocalizedMessage()),
                                     BuildContext.SEVERITY_ERROR, exception);
-
+            if (firstError == null) {
+                firstError = exception;
+                firstError.fillInStackTrace();
+            }
         }
 
         private String mapMessage(String localizedMessage) {
