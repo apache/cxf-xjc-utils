@@ -19,19 +19,23 @@
 
 package org.apache.cxf.maven_plugin;
 
-import org.apache.maven.plugin.MojoExecutionException;
+import java.util.List;
 
-/**
- * @goal xsdtojava-tests
- * @phase generate-test-sources
- * @description CXF XSD To Java Tool
- * @threadSafe
- */
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+
+@Mojo(name = "xsdtojava-tests",
+    defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
+    threadSafe = true,
+    requiresDependencyResolution = ResolutionScope.TEST
+)
 public class TestXSDToJavaMojo extends AbstractXSDToJavaMojo {    
-    /**
-     * @parameter expression="${project.build.directory}/generated/src/test/java"
-     * @required
-     */
+
+    @Parameter(required = true, defaultValue = "${project.build.directory}/generated/src/test/java")
     String testSourceRoot;
     
 
@@ -47,4 +51,9 @@ public class TestXSDToJavaMojo extends AbstractXSDToJavaMojo {
     String getOutputDir() {
         return testSourceRoot;
     }
+    
+    protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
+        return project.getTestClasspathElements();
+    }
+
 }

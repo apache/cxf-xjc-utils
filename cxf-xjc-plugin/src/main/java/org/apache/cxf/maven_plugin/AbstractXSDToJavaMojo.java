@@ -20,129 +20,97 @@
 package org.apache.cxf.maven_plugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
-import com.sun.tools.xjc.XJCListener;
+import com.sun.codemodel.CodeWriter;
+import com.sun.codemodel.JCodeModel;
+import com.sun.tools.xjc.ErrorReceiver;
+import com.sun.tools.xjc.Language;
+import com.sun.tools.xjc.ModelLoader;
+import com.sun.tools.xjc.Options;
+import com.sun.tools.xjc.model.Model;
+import com.sun.tools.xjc.outline.Outline;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
-import org.apache.maven.shared.downloader.Downloader;
+import org.apache.maven.repository.RepositorySystem;
+import org.apache.xml.resolver.CatalogManager;
+import org.apache.xml.resolver.tools.CatalogResolver;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * @description CXF XSD To Java Tool
  */
-public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
-    /**
-     * @parameter expression="${project}"
-     * @required
-     */
-    MavenProject project;
+public abstract class AbstractXSDToJavaMojo extends AbstractMojo {   
+    @Component
+    protected MavenProject project;
     
-    
-    /**
-     * @parameter
-     */
+    @Parameter
     XsdOption xsdOptions[];
     
     /**
      * Directory in which the "DONE" markers are saved that 
-     * @parameter expression="${cxf.markerDirectory}" 
-     *            default-value="${project.build.directory}/cxf-xsd-plugin-markers"
      */
+    @Parameter(defaultValue = "${project.build.directory}/cxf-xsd-plugin-markers",
+        property = "cxf.markerDirectory")
     File markerDirectory;
-    
     
     /**
      * The extension artifacts that will be retrieved and added to the classpath.
-     *
-     * @parameter
      */
+    @Parameter
     private List<String> extensions;
     
-    
-    /**
-     * Artifact downloader.
-     *
-     * @component
-     * @readonly
-     * @required
-     */
-    private Downloader downloader;
-
-    /**
-     * The local repository taken from Maven's runtime. Typically $HOME/.m2/repository.
-     *
-     * @parameter expression="${localRepository}"
-     * @readonly
-     * @required
-     */
-    private ArtifactRepository localRepository;
-
-    /**
-     * List of Remote Repositories used by the resolver
-     *
-     * @parameter expression="${project.remoteArtifactRepositories}"
-     * @readonly
-     * @required
-     */
-    private List<ArtifactRepository> remoteArtifactRepositories;
-    
-
-    /**
-     * Project builder -- builds a model from a pom.xml
-     *
-     * @component role="org.apache.maven.project.MavenProjectBuilder"
-     * @required
-     * @readonly
-     */
-    private MavenProjectBuilder mavenProjectBuilder;
-
-
-    /**
-     * Artifact factory, needed to download source jars for inclusion in classpath.
-     *
-     * @component role="org.apache.maven.artifact.factory.ArtifactFactory"
-     * @required
-     * @readonly
-     */
-    private ArtifactFactory artifactFactory;
-
-    
-    /** @component */
+       
+    @Component
     private BuildContext buildContext;
-            
+                
+    @Component
+    private RepositorySystem repository;
+        
+    @Component
+    private MavenSession session;
+    
     
     abstract String getOutputDir();
     
     
     
-    class Listener extends XJCListener {
+    class XJCErrorListener extends ErrorReceiver {
         private final List<File> errorfiles;
         private Exception firstError;
         
-        Listener(List<File> errorfiles) {
+        XJCErrorListener(List<File> errorfiles) {
             this.errorfiles = errorfiles;
         }
         public Exception getFirstError() {
             return firstError;
         }
 
+        public void error(Exception exception) {
+            if (firstError == null) {
+                firstError = exception;
+                firstError.fillInStackTrace();
+            }
+        }
         public void error(SAXParseException exception) {
             final String sysId = exception.getSystemId();
             File file = mapFile(sysId);
@@ -216,6 +184,16 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
 
         public void info(SAXParseException exception) {
             //System.out.println(mapFile(exception.getSystemId()));
+        }
+        public void message(File file, String string) {
+            buildContext.addMessage(file, 0, 0,
+                                    mapMessage(string),
+                                    BuildContext.SEVERITY_ERROR, null);
+        }
+        public void warning(File file, Exception e) {
+            buildContext.addMessage(file, 0, 0,
+                                    mapMessage(e.getLocalizedMessage()),
+                                    BuildContext.SEVERITY_WARNING, e);
         }
     }
     
@@ -332,8 +310,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         removeMessages(xsdOptions[x].getXsd());
                         removeMessages(xsdOptions[x].getBindingFile());
                         
-                        Listener listener = new Listener(errorFiles);
-                        int i = com.sun.tools.xjc.Driver.run(args, listener);
+                        XJCErrorListener listener = new XJCErrorListener(errorFiles);
+                        int i = run(args, listener, new File(xsdOptions[x].getXsd()));
                         if (i == 0) {
                             doneFile.delete();
                             doneFile.createNewFile();
@@ -361,6 +339,103 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     
+    private List<File> resolve(String artifactDescriptor) {
+        String[] s = artifactDescriptor.split(":");
+
+        String type = s.length >= 4 ? s[3] : "jar";
+        Artifact artifact = repository.createArtifact(s[0], s[1], s[2], type);
+
+        ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+        request.setArtifact(artifact);
+        
+        request.setResolveRoot(true).setResolveTransitively(true);
+        request.setServers(session.getRequest().getServers());
+        request.setMirrors(session.getRequest().getMirrors());
+        request.setProxies(session.getRequest().getProxies());
+        request.setLocalRepository(session.getLocalRepository());
+        request.setRemoteRepositories(session.getRequest().getRemoteRepositories());
+        ArtifactResolutionResult result = repository.resolve(request);
+        List<File> files = new ArrayList<File>();
+        for (Artifact a : result.getArtifacts()) {
+            files.add(a.getFile());
+        }
+        if (!files.contains(artifact.getFile())) {
+            files.add(artifact.getFile());
+        }
+        return files;
+    }
+    
+    protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
+        return project.getCompileClasspathElements();
+    }
+    
+    private int run(String[] args, final XJCErrorListener listener, final File file) 
+        throws Exception {
+        
+        List<String> cpList = getClasspathElements();
+        List<URL> urls = new ArrayList<URL>();
+        for (String s : cpList) {
+            urls.add(new File(s).toURI().toURL());
+        }
+        final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        
+        CatalogManager.getStaticManager().setIgnoreMissingProperties(true);
+        final CatalogResolver catResolver = new CatalogResolver(true) {
+            public InputSource resolveEntity(String publicId, String systemId) {
+                String resolved = getResolvedEntity(publicId, systemId);
+                URL url;
+                InputSource iSource = new InputSource(resolved);
+                iSource.setPublicId(publicId);
+                try {
+                    if (resolved.startsWith("classpath:")) {
+                        resolved = resolved.substring("classpath:".length());
+                        url = loader.getResource(resolved);
+                        iSource.setSystemId(url.toExternalForm());
+                    } else {
+                        url = new URL(resolved);
+                    }
+                    InputStream iStream = url.openStream();
+                    iSource.setByteStream(iStream);
+
+                    return iSource;
+                } catch (Exception e) {
+                    listener.warning(file, e);
+                    return null;
+                }
+            }
+        };
+        final Options opt = new Options() {
+            @Override
+            public void addCatalog(File catalogFile) throws IOException {
+                if (entityResolver == null) {
+                    entityResolver = catResolver;
+                }
+                catResolver.getCatalog().parseCatalog(catalogFile.getPath());
+            }
+        };
+        opt.setSchemaLanguage(Language.XMLSCHEMA);
+        opt.parseArguments(args);
+        Model model = ModelLoader.load(opt, new JCodeModel(), listener);
+        if (model == null) {
+            listener.message(file, "Failed to create model");
+            return -1;
+        }
+        Outline outline = model.generateCode(opt, listener);
+        if (outline == null) {
+            listener.message(file, "Failed to generate code");
+            return -1;
+        }
+
+        // then print them out
+        try {
+            CodeWriter cw = opt.createCodeWriter();
+            model.codeModel.build(cw);
+        } catch (IOException e) {
+            listener.error(e);
+            return -1;
+        }
+        return 0;
+    }
     private void removeMessages(String file) throws MojoExecutionException {
         if (file == null) {
             return;
@@ -377,36 +452,14 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         List<URL> newCp = new ArrayList<URL>();
         List<String> list = new ArrayList<String>();
         if (extensions != null && extensions.size() > 0) {
-            Set<Artifact> artifacts = new HashSet<Artifact>();
-            
             try {
                 for (String ext : extensions) {
-                    String[] s = ext.split(":");
-                    
-                    if (s.length != 3) {
-                        throw new MojoExecutionException("Extension should be defined as"
-                                                         + " groupId:artifactId:version. "
-                                                         + ext + " does not meet that pattern.");
+                    for (File file : resolve(ext)) {
+                        list.add("-classpath");
+                        list.add(file.getAbsolutePath());
+                        newCp.add(file.toURI().toURL());
                     }
-                    
-                    Artifact artifact = artifactFactory.createBuildArtifact(s[0], s[1], s[2], "jar");
-                    artifacts.add(artifact);
-                    MavenProject p = mavenProjectBuilder
-                        .buildFromRepository(artifact, remoteArtifactRepositories, localRepository);
-                    @SuppressWarnings("unchecked")
-                    Set<Artifact> a2 = p.createArtifacts(artifactFactory, Artifact.SCOPE_RUNTIME,
-                                               new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME));
-                    artifacts.addAll(a2);
                 }
-                for (Artifact art : artifacts) {
-                    File f = downloader.download(art.getGroupId(), art.getArtifactId(), art.getVersion(), 
-                                                 localRepository, remoteArtifactRepositories);
-                    list.add("-classpath");
-                    list.add(f.getAbsolutePath());
-                    newCp.add(f.toURI().toURL());
-                }
-            } catch (MojoExecutionException mojo) {
-                throw mojo;
             } catch (Exception ex) {
                 throw new MojoExecutionException("Could not download extension artifact", ex);
             }

@@ -20,20 +20,19 @@
 package org.apache.cxf.maven_plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
-/**
- * @goal xsdtojava
- * @phase generate-sources
- * @description CXF XSD To Java Tool
- * @threadSafe
- */
+@Mojo(name = "xsdtojava",
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    threadSafe = true,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME
+)
 public class XSDToJavaMojo extends AbstractXSDToJavaMojo {    
-    /**
-     * @parameter expression="${project.build.directory}/generated/src/main/java"
-     * @required
-     */
+    @Parameter(required = true, defaultValue = "${project.build.directory}/generated/src/main/java")
     String sourceRoot;
-    
 
     public void execute() throws MojoExecutionException {
         if (project != null && sourceRoot != null) {
@@ -45,7 +44,6 @@ public class XSDToJavaMojo extends AbstractXSDToJavaMojo {
 
     @Override
     String getOutputDir() {
-        // TODO Auto-generated method stub
         return sourceRoot;
     }
 }
