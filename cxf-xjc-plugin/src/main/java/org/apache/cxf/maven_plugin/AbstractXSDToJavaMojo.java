@@ -433,8 +433,6 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }          
         if (getLog().isDebugEnabled()) {
             list.add("-verbose");            
-        } else { 
-            list.add("-quiet");
         }
         list.add("-d");
         list.add(outputDir);
