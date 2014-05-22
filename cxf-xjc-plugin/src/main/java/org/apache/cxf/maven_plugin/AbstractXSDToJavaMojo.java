@@ -383,6 +383,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         final CatalogResolver catResolver = new CatalogResolver(true) {
             public InputSource resolveEntity(String publicId, String systemId) {
                 String resolved = getResolvedEntity(publicId, systemId);
+                if (resolved == null) {
+                    return null;
+                }
                 URL url;
                 InputSource iSource = new InputSource(resolved);
                 iSource.setPublicId(publicId);
