@@ -379,10 +379,16 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
         
-        CatalogManager.getStaticManager().setIgnoreMissingProperties(true);
-        final CatalogResolver catResolver = new CatalogResolver(true) {
+        CatalogManager cm = new CatalogManager();
+        cm.setUseStaticCatalog(false);
+        cm.setIgnoreMissingProperties(true);
+        final CatalogResolver catResolver = new CatalogResolver(cm) {
             public InputSource resolveEntity(String publicId, String systemId) {
                 String resolved = getResolvedEntity(publicId, systemId);
+                //System.out.println("Resolved: ");
+                //System.out.println("        : " + publicId);
+                //System.out.println("        : " + systemId);
+                //System.out.println("        -> " + resolved);
                 if (resolved == null) {
                     return null;
                 }
