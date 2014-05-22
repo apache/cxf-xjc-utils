@@ -42,15 +42,16 @@
     </xs:simpleType>
 
     <xs:complexType name="pageColor">
-	<xs:sequence>
-	    <xs:element name="background" type="xs:string" default="red"/>
-	    <xs:element name="foreground" type="xs:string" default="blue"/>
+        <xs:sequence>
+            <xs:element name="background" type="xs:string" default="red" minOccurs="0"/>
+            <xs:element name="foreground" type="xs:string" default="blue" minOccurs="0"/>
     	</xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="foo">        
         <xs:sequence>
-	    <xs:element name="pageColor" type="tns:pageColor" minOccurs="0"></xs:element>
+	        <xs:element name="pageColor2" type="tns:pageColor"></xs:element>
+	        <xs:element name="pageColor" type="tns:pageColor" minOccurs="0"></xs:element>
             <xs:element name="driving" type="tns:drivingDecision" default="LeftTurn" minOccurs="0"></xs:element>
             <xs:element name="StringElem" type="xs:string" default="hello" minOccurs="0"></xs:element>
             <xs:element name="BooleanElem" type="xs:boolean" default="true" minOccurs="0"></xs:element>
@@ -128,6 +129,8 @@
             <xs:element name="X" type="xs:int" default="0" minOccurs="0"></xs:element>
             <xs:element name="Y" type="xs:int" default="0" minOccurs="0"></xs:element>
         </xs:sequence>
-    </xs:complexType>    
-        
+    </xs:complexType>
+    
+    <xs:element name="fooElement" type="tns:foo"/>
+    
 </xs:schema>

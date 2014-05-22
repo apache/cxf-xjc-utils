@@ -19,9 +19,12 @@
 
 package com.sun.tools.xjc.addon.apache_cxf.dv;
 
+import java.io.IOException;
+
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
+import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.outline.Outline;
@@ -58,4 +61,20 @@ public class DefaultValuePlugin extends Plugin {
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) throws SAXException {
         return impl.run(outline, opt, errorHandler);
     }
+    
+    public void onActivated(Options opts) throws BadCommandLineException {
+        impl.onActivated(opts);
+    }
+
+    
+    /* (non-Javadoc)
+     * @see com.sun.tools.xjc.Plugin#parseArgument(com.sun.tools.xjc.Options, java.lang.String[], int)
+     */
+    @Override
+    public int parseArgument(Options opt, String[] args, int index) 
+        throws BadCommandLineException, IOException {
+        
+        return impl.parseArgument(opt, args, index, this);
+    }
+    
 }

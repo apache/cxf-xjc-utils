@@ -19,14 +19,21 @@
 
 package org.apache.cxf.xjc.dv;
 
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.namespace.QName;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import org.apache.cxf.configuration.foo.Foo;
 import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
@@ -49,7 +56,8 @@ public class DefaultValueTest extends Assert {
 
         assertAttributeValuesWithoutDefault(foo);
         assertDefaultAttributeValues(foo);        
-        assertDefaultElementValues(foo);   
+        assertDefaultElementValues(foo);
+        assertSchemaValid(foo);
     }
 
     private void checkCXF3131(Foo foo) throws Exception {
@@ -157,10 +165,11 @@ public class DefaultValueTest extends Assert {
     }
     
     private void assertDefaultElementValues(Foo foo) {
+        assertNull(foo.getPageColor());
         assertEquals("Unexpected value for element pageColor.background", "red", 
-                     foo.getPageColor().getBackground());
+                     foo.getPageColor2().getBackground());
         assertEquals("Unexpected value for element pageColor.foreground", "blue", 
-                     foo.getPageColor().getForeground());
+                     foo.getPageColor2().getForeground());
 
         assertEquals("Unexpected value for element driving",
                      "LeftTurn", foo.getDriving().value());
@@ -219,5 +228,15 @@ public class DefaultValueTest extends Assert {
                      3, foo.getDurationElem().getHours());
     }
     
-    
+    private void assertSchemaValid(Foo foo) throws Exception {
+        Marshaller marshaller = JAXBContext.newInstance(Foo.class).createMarshaller();
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = sf.newSchema(getClass().getResource("/schemas/configuration/foo.xsd"));
+        marshaller.setSchema(schema);
+        
+        JAXBElement<Foo> fooElement = 
+                new org.apache.cxf.configuration.foo.ObjectFactory().createFooElement(foo);
+        
+        marshaller.marshal(fooElement, new StringWriter());
+    }
 }

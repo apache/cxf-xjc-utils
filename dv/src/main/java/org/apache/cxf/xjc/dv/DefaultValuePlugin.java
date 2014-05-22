@@ -19,6 +19,7 @@
 
 package org.apache.cxf.xjc.dv;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,7 @@ import com.sun.codemodel.JOp;
 import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
+import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
@@ -64,6 +66,8 @@ import com.sun.xml.xsom.XmlString;
 public class DefaultValuePlugin {
     
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
+    private boolean complexTypes;
+    private boolean active;
     
     public DefaultValuePlugin() {
     }
@@ -73,9 +77,30 @@ public class DefaultValuePlugin {
     }
 
     public String getUsage() {
-        return "  -Xdv                 : Initialize fields mapped from elements with their default values";
+        return   "  -Xdv                 : Initialize fields mapped from elements with their default values\n"
+               + "  -Xdv:optional        : Initialize fields mapped from elements with their default values\n"
+               + "                         for elements with minOccurs=0 but with complexTypes containing \n"
+               + "                         fields with default values.";
     }
 
+    public int parseArgument(Options opt, String[] args, int index, com.sun.tools.xjc.Plugin plugin) 
+        throws BadCommandLineException, IOException {
+        int ret = 0;
+        
+        if (args[index].startsWith("-Xdv")) {
+            ret = 1;                    
+            if (args[index].equals("-Xts:optional")) {
+                complexTypes = true;
+            }
+            if (!opt.activePlugins.contains(plugin)) {
+                opt.activePlugins.add(plugin);
+            }
+            active = true;
+        }
+        return ret;
+    }
+
+    
     private boolean containsDefaultValue(Outline outline, FieldOutline field) {
         ClassOutline fClass = null;
         for (ClassOutline classOutline : outline.getClasses()) {
@@ -101,6 +126,9 @@ public class DefaultValuePlugin {
     }
 
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
+        if (!active) {
+            return true;
+        }
         LOG.fine("Running default value plugin.");
         for (ClassOutline co : outline.getClasses()) {
             for (FieldOutline f : co.getDeclaredFields()) {
@@ -112,8 +140,9 @@ public class DefaultValuePlugin {
                 XSType xsType = null;
                 boolean isElement = false;
                 boolean isRequiredAttr = true;
+                XSParticle particle = null;
                 if (f.getPropertyInfo().getSchemaComponent() instanceof XSParticle) {
-                    XSParticle particle = (XSParticle)f.getPropertyInfo().getSchemaComponent();
+                    particle = (XSParticle)f.getPropertyInfo().getSchemaComponent();
                     XSTerm term = particle.getTerm();
                     XSElementDecl element = null;
 
@@ -132,7 +161,10 @@ public class DefaultValuePlugin {
                 }
 
                 
-                if (xsType != null && xsType.isComplexType() && containsDefaultValue(outline, f)) {
+                if (xsType != null 
+                    && xsType.isComplexType()
+                    && ((containsDefaultValue(outline, f) && complexTypes)
+                        || (particle != null && particle.getMinOccurs() != 0))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null) {
@@ -386,6 +418,10 @@ public class DefaultValuePlugin {
             dc.methods().add(method);
         }
         
+    }
+
+    public void onActivated(Options opts) {
+        active = true;
     }
 
 }
