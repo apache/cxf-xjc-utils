@@ -21,25 +21,12 @@ package org.apache.cxf.maven_plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXParseException;
-
-import com.sun.codemodel.CodeWriter;
-import com.sun.codemodel.JCodeModel;
-import com.sun.tools.xjc.ErrorReceiver;
-import com.sun.tools.xjc.Language;
-import com.sun.tools.xjc.ModelLoader;
-import com.sun.tools.xjc.Options;
-import com.sun.tools.xjc.model.Model;
-import com.sun.tools.xjc.outline.Outline;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -52,8 +39,13 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.xml.resolver.CatalogManager;
-import org.apache.xml.resolver.tools.CatalogResolver;
+import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.jar.Manifest;
+import org.codehaus.plexus.archiver.jar.Manifest.Attribute;
+import org.codehaus.plexus.util.cli.CommandLineException;
+import org.codehaus.plexus.util.cli.CommandLineUtils;
+import org.codehaus.plexus.util.cli.Commandline;
+import org.codehaus.plexus.util.cli.StreamConsumer;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
@@ -80,7 +72,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     private List<String> extensions;
     
        
-    @Component
+    @Component 
     private BuildContext buildContext;
                 
     @Component
@@ -89,113 +81,34 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     @Component
     private MavenSession session;
     
+    /**
+     * Allows running in a separate process.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean fork;
+    
+    /**
+     * Sets the Java executable to use when fork parameter is <code>true</code>.
+     */
+    @Parameter(defaultValue = "${java.home}/bin/java")
+    private String javaExecutable;
+    
+    
+    /**
+     * Sets the JVM arguments (i.e. <code>-Xms128m -Xmx128m</code>) if fork is set to <code>true</code>.
+     */
+    @Parameter(property = "cxf.xjc.jvmArgs")
+    private String additionalJvmArgs;
+    
+    /**
+     * The plugin dependencies, needed for the fork mode.
+     */
+    @Parameter(property = "plugin.artifacts", readonly = true, required = true)
+    private List<Artifact> pluginArtifacts;    
     
     abstract String getOutputDir();
     
     
-    
-    class XJCErrorListener extends ErrorReceiver {
-        private final List<File> errorfiles;
-        private Exception firstError;
-        
-        XJCErrorListener(List<File> errorfiles) {
-            this.errorfiles = errorfiles;
-        }
-        public Exception getFirstError() {
-            return firstError;
-        }
-
-        public void error(Exception exception) {
-            if (firstError == null) {
-                firstError = exception;
-                firstError.fillInStackTrace();
-            }
-        }
-        public void error(SAXParseException exception) {
-            final String sysId = exception.getSystemId();
-            File file = mapFile(sysId);
-            if (file != null && !errorfiles.contains(file)) {
-                buildContext.removeMessages(file);
-                errorfiles.add(file);
-            }
-            
-            buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
-                                    mapMessage(exception.getLocalizedMessage()),
-                                    BuildContext.SEVERITY_ERROR, exception);
-            if (firstError == null) {
-                firstError = exception;
-                firstError.fillInStackTrace();
-            }
-        }
-
-        private String mapMessage(String localizedMessage) {
-            return localizedMessage;
-        }
-
-        private File mapFile(String s) {
-            File file = null;
-            if (s != null && s.startsWith("file:")) {
-                if (s.contains("#")) {
-                    s = s.substring(0, s.indexOf('#'));
-                }
-                try {
-                    URI uri = new URI(s);
-                    file = new File(uri);
-                } catch (URISyntaxException e) {
-                    //ignore
-                }
-            }
-            if (file == null) {
-                //Cannot pass a null into buildContext.addMessage.  Create a pointless
-                //File object that maps to the systemId
-                if (s == null) {
-                    file = new File("null");
-                } else {
-                    final String s2 = s;
-                    file = new File(s2) {
-                        private static final long serialVersionUID = 1L;
-                        public String getAbsolutePath() {
-                            return s2;
-                        }
-                    };
-                }
-            }                     
-            return file;
-        }
-
-        public void fatalError(SAXParseException exception) {
-            error(exception);
-            if (firstError == null) {
-                firstError = exception;
-                firstError.fillInStackTrace();
-            }
-        }
-
-        public void warning(SAXParseException exception) {
-            File file = mapFile(exception.getSystemId());
-            if (file != null && !errorfiles.contains(file)) {
-                buildContext.removeMessages(file);
-                errorfiles.add(file);
-            }
-            buildContext.addMessage(file, exception.getLineNumber(), exception.getColumnNumber(),
-                                    mapMessage(exception.getLocalizedMessage()),
-                                    BuildContext.SEVERITY_WARNING, exception);
-        }
-
-        public void info(SAXParseException exception) {
-            //System.out.println(mapFile(exception.getSystemId()));
-        }
-        public void message(File file, String string) {
-            buildContext.addMessage(file, 0, 0,
-                                    mapMessage(string),
-                                    BuildContext.SEVERITY_ERROR, null);
-        }
-        public void warning(File file, Exception e) {
-            buildContext.addMessage(file, 0, 0,
-                                    mapMessage(e.getLocalizedMessage()),
-                                    BuildContext.SEVERITY_WARNING, e);
-        }
-    }
     
     private URI mapLocation(String s) throws MojoExecutionException {
         try {
@@ -239,12 +152,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (xsdOptions == null) {
             throw new MojoExecutionException("Must specify xsdOptions");           
         }
-        List<File> errorFiles = new ArrayList<File>();
     
         for (int x = 0; x < xsdOptions.length; x++) {
             ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
             try {
-                String[] args = getArguments(xsdOptions[x], outputDir);
                 URI xsdURI = mapLocation(xsdOptions[x].getXsd());
                 URI basedir = project.getBasedir().toURI();
                 
@@ -309,14 +220,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         }
                         removeMessages(xsdOptions[x].getXsd());
                         removeMessages(xsdOptions[x].getBindingFile());
-                        
-                        XJCErrorListener listener = new XJCErrorListener(errorFiles);
-                        int i = run(args, listener, new File(xsdOptions[x].getXsd()));
+                        int i = run(xsdOptions[x], outputDir);
                         if (i == 0) {
                             doneFile.delete();
                             doneFile.createNewFile();
-                        } else if (listener.getFirstError() != null) {
-                            throw listener.getFirstError();
                         }
                         File dirs[] = xsdOptions[x].getDeleteDirs();
                         if (dirs != null) {
@@ -369,82 +276,19 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         return project.getCompileClasspathElements();
     }
     
-    private int run(String[] args, final XJCErrorListener listener, final File file) 
-        throws Exception {
-        
-        List<String> cpList = getClasspathElements();
-        List<URL> urls = new ArrayList<URL>();
-        for (String s : cpList) {
-            urls.add(new File(s).toURI().toURL());
-        }
-        final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
-        
-        CatalogManager cm = new CatalogManager();
-        cm.setUseStaticCatalog(false);
-        cm.setIgnoreMissingProperties(true);
-        final CatalogResolver catResolver = new CatalogResolver(cm) {
-            public InputSource resolveEntity(String publicId, String systemId) {
-                String resolved = getResolvedEntity(publicId, systemId);
-                //System.out.println("Resolved: ");
-                //System.out.println("        : " + publicId);
-                //System.out.println("        : " + systemId);
-                //System.out.println("        -> " + resolved);
-                if (resolved == null) {
-                    return null;
-                }
-                URL url;
-                InputSource iSource = new InputSource(resolved);
-                iSource.setPublicId(publicId);
-                try {
-                    if (resolved.startsWith("classpath:")) {
-                        resolved = resolved.substring("classpath:".length());
-                        url = loader.getResource(resolved);
-                        iSource.setSystemId(url.toExternalForm());
-                    } else {
-                        url = new URL(resolved);
-                    }
-                    InputStream iStream = url.openStream();
-                    iSource.setByteStream(iStream);
-
-                    return iSource;
-                } catch (Exception e) {
-                    listener.warning(file, e);
-                    return null;
-                }
+    private int run(XsdOption option, String outputDir) throws Exception {
+        if (!fork) {
+            String[] args = getArguments(option, outputDir);
+            XJCErrorListener listener = new XJCErrorListener(buildContext);
+            int i = new XSDToJavaRunner(args, listener, new File(option.getXsd()), getClasspathElements()).run();
+            if (i != 0 && listener.getFirstError() != null) {
+                throw listener.getFirstError();
             }
-        };
-        final Options opt = new Options() {
-            @Override
-            public void addCatalog(File catalogFile) throws IOException {
-                if (entityResolver == null) {
-                    entityResolver = catResolver;
-                }
-                catResolver.getCatalog().parseCatalog(catalogFile.getPath());
-            }
-        };
-        opt.setSchemaLanguage(Language.XMLSCHEMA);
-        opt.parseArguments(args);
-        Model model = ModelLoader.load(opt, new JCodeModel(), listener);
-        if (model == null) {
-            listener.message(file, "Failed to create model");
-            return -1;
+            return i;
         }
-        Outline outline = model.generateCode(opt, listener);
-        if (outline == null) {
-            listener.message(file, "Failed to generate code");
-            return -1;
-        }
-
-        // then print them out
-        try {
-            CodeWriter cw = opt.createCodeWriter();
-            model.codeModel.build(cw);
-        } catch (IOException e) {
-            listener.error(e);
-            return -1;
-        }
-        return 0;
+        return runForked(option, outputDir);
     }
+    
     private void removeMessages(String file) throws MojoExecutionException {
         if (file == null) {
             return;
@@ -521,4 +365,143 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         
         return true;
     }
+    private File getJavaExecutable() throws IOException {
+        String exe = isWindows() && !javaExecutable.endsWith(".exe") ? ".exe" : "";
+        File javaExe = new File(javaExecutable + exe);
+
+        if (!javaExe.isFile()) {
+            throw new IOException(
+                                  "The java executable '"
+                                      + javaExe
+                                      + "' doesn't exist or is not a file." 
+                                      + "Verify the <javaExecutable/> parameter.");
+        }
+        return javaExe;
+    }
+    private boolean isWindows() {
+        String osName = System.getProperty("os.name");
+        if (osName == null) {
+            return false;
+        }
+        return osName.startsWith("Windows");
+    }
+    
+    private int runForked(XsdOption option, String outputDir) throws Exception {
+        String[] args = getArguments(option, outputDir);
+        Commandline cmd = new Commandline();
+        cmd.getShell().setQuotedArgumentsEnabled(true); // for JVM args
+        cmd.setWorkingDirectory(project.getBuild().getDirectory());
+        try {
+            cmd.setExecutable(getJavaExecutable().getAbsolutePath());
+        } catch (IOException e) {
+            getLog().debug(e);
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+        cmd.createArg().setLine(additionalJvmArgs);
+        
+        
+        File file = null;
+        try {
+            // file = new File("/tmp/test.jar");
+            file = File.createTempFile("cxf-xjc-plugin", ".jar");
+            file.deleteOnExit();
+            
+            JarArchiver jar = new JarArchiver();
+            jar.setDestFile(file.getAbsoluteFile());
+
+            Manifest manifest = new Manifest();
+            Attribute attr = new Attribute();
+            attr.setName("Class-Path");
+            StringBuilder b = new StringBuilder(8000);
+            for (String cp : getClasspathElements()) {
+                b.append(cp).append(' ');
+            }
+            for (Artifact a : pluginArtifacts) {
+                b.append(a.getFile().getAbsolutePath()).append(' ');
+            }
+            attr.setValue(b.toString());
+            manifest.getMainSection().addConfiguredAttribute(attr);
+
+            attr = new Attribute();
+            attr.setName("Main-Class");
+            attr.setValue(XSDToJavaRunner.class.getName());
+            manifest.getMainSection().addConfiguredAttribute(attr);
+
+            jar.addConfiguredManifest(manifest);
+            jar.createArchive();
+
+            cmd.createArg().setValue("-jar");
+            
+            String tmpFilePath = file.getAbsolutePath();
+            if (tmpFilePath.contains(" ")) {
+                //ensure the path is in double quotation marks if the path contain space
+                tmpFilePath = "\"" + tmpFilePath + "\"";
+            }
+            cmd.createArg().setValue(tmpFilePath);
+
+        } catch (Exception e1) {
+            throw new MojoExecutionException("Could not create runtime jar", e1);
+        }
+        cmd.addArguments(args);
+
+        StreamConsumer out = new StreamConsumer() {
+            File file;
+            int severity;
+            int linenum;
+            int column;
+            StringBuilder message = new StringBuilder();
+            
+            public void consumeLine(String line) {
+                if (line.startsWith("DONE")) {
+                    buildContext.addMessage(file, linenum, column, message.toString(), severity, null);
+                } else if (line.startsWith("MSG: ")
+                    || line.startsWith("ERROR: ")
+                    || line.startsWith("WARNING: ")) {
+                    file = new File(line.substring(line.indexOf(' ')).trim());
+                    String type = line.substring(0, line.indexOf(':'));
+                    if (type.contains("ERROR")) {
+                        severity = BuildContext.SEVERITY_ERROR;
+                    } else if (type.contains("WARNING")) {
+                        severity = BuildContext.SEVERITY_WARNING;
+                    } else {
+                        severity = 0;
+                    }
+                    linenum = 0;
+                    column = 0;
+                    message.setLength(0);
+                } else if (line.startsWith("Col: ")) {
+                    column = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
+                } else if (line.startsWith("Line: ")) {
+                    linenum = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
+                } else if (line.startsWith("Severity: ")) {
+                    severity = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
+                } else {
+                    message.append(line).append('\n');
+                }
+            }
+        };
+        int exitCode;
+        try {
+            exitCode = CommandLineUtils.executeCommandLine(cmd, out, out);
+        } catch (CommandLineException e) {
+            getLog().debug(e);
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+        
+
+        String cmdLine = CommandLineUtils.toString(cmd.getCommandline());
+
+        if (exitCode != 0) {
+            StringBuffer msg = new StringBuffer("\nExit code: ");
+            msg.append(exitCode);
+            msg.append('\n');
+            msg.append("Command line was: ").append(cmdLine).append('\n').append('\n');
+
+            throw new MojoExecutionException(msg.toString());
+        }
+
+        file.delete();
+        return 0;
+    }
+    
 }
