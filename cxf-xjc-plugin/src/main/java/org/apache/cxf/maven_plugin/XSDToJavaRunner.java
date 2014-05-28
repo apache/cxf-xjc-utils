@@ -27,6 +27,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElementRef;
+
 import org.xml.sax.InputSource;
 
 import com.sun.codemodel.CodeWriter;
@@ -34,6 +36,7 @@ import com.sun.codemodel.JCodeModel;
 import com.sun.tools.xjc.Language;
 import com.sun.tools.xjc.ModelLoader;
 import com.sun.tools.xjc.Options;
+import com.sun.tools.xjc.api.SpecVersion;
 import com.sun.tools.xjc.model.Model;
 import com.sun.tools.xjc.outline.Outline;
 
@@ -108,6 +111,9 @@ public class XSDToJavaRunner {
                 catResolver.getCatalog().parseCatalog(catalogFile.getPath());
             }
         };
+        if (checkXmlElementRef()) {
+            opt.target = SpecVersion.V2_1;
+        }
         opt.setSchemaLanguage(Language.XMLSCHEMA);
         opt.parseArguments(args);
         Model model = ModelLoader.load(opt, new JCodeModel(), listener);
@@ -130,6 +136,16 @@ public class XSDToJavaRunner {
             return -1;
         }
         return 0;        
+    }
+    private boolean checkXmlElementRef() {
+        try {
+            //check the version of JAXB-API that is actually being picked up
+            //so we can set target=2.1 if the 2.1 version of XmlElementRef is picked up
+            XmlElementRef.class.getMethod("required");
+        } catch (Throwable t) {
+            return true;
+        }
+        return false;
     }
     public static void main(String[] args) throws Exception {
         BuildContext context = new XJCBuildContext();

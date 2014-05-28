@@ -20,6 +20,7 @@
 package org.apache.cxf.xjc.bug671;
 
 
+import com.sun.codemodel.JJavaName;
 import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
@@ -59,7 +60,7 @@ public class Bug671Plugin {
                     if (idx2 == -1) {
                         idx2 = s.length();
                     }
-                    if (!isJavaIdentifier(s.substring(idx, idx2))) {
+                    if (!JJavaName.isJavaIdentifier(s.substring(idx, idx2))) {
                         s = s.substring(0, idx) + "_" + s.substring(idx);
                     }
                     idx = s.indexOf('.', idx);

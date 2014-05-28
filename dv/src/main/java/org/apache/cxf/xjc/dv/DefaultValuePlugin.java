@@ -125,6 +125,15 @@ public class DefaultValuePlugin {
         return false;
     }
 
+    private int getMinOccurs(XSParticle particle) {
+        try {
+            Number o = (Number)particle.getClass().getMethod("getMinOccurs").invoke(particle);
+            return o.intValue(); 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
         if (!active) {
             return true;
@@ -164,7 +173,7 @@ public class DefaultValuePlugin {
                 if (xsType != null 
                     && xsType.isComplexType()
                     && ((containsDefaultValue(outline, f) && complexTypes)
-                        || (particle != null && particle.getMinOccurs() != 0))) {
+                        || (particle != null && getMinOccurs(particle) != 0))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null) {
