@@ -32,9 +32,8 @@
     </parent>
     <scm>
       <connection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</connection>
-      <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</developerConnection>
+    </scm>
     <issueManagement>
         <system>jira</system>
         <url>https://issues.apache.org/jira/browse/CXFXJC</url>
@@ -222,7 +221,6 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5</version>
                     <configuration>
-                        <tagBase>https://svn.apache.org/repos/asf/cxf/xjc-utils/tags</tagBase>
                         <useReleaseProfile>false</useReleaseProfile>
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
