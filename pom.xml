@@ -21,7 +21,7 @@
     <groupId>org.apache.cxf.xjc-utils</groupId>
     <artifactId>xjc-utils</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <name>Apache CXF XJC Utils</name>
     <url>http://cxf.apache.org</url>
 
@@ -33,7 +33,8 @@
     <scm>
       <connection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</connection>
       <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/cxf-xjc-utils.git</developerConnection>
-    </scm>
+      <tag>xjc-utils-3.0.0</tag>
+  </scm>
     <issueManagement>
         <system>jira</system>
         <url>https://issues.apache.org/jira/browse/CXFXJC</url>
