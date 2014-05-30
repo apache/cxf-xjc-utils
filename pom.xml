@@ -36,7 +36,7 @@
     </scm>
     <issueManagement>
         <system>jira</system>
-        <url>https://issues.apache.org/jira/browse/CXF</url>
+        <url>https://issues.apache.org/jira/browse/CXFXJC</url>
     </issueManagement>
     <prerequisites>
         <maven>3.0</maven>
