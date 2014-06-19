@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
@@ -279,6 +280,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     private int run(XsdOption option, String outputDir) throws Exception {
         if (!fork) {
             String[] args = getArguments(option, outputDir);
+            this.getLog().debug("Args: " + Arrays.asList(args));
             XJCErrorListener listener = new XJCErrorListener(buildContext);
             int i = new XSDToJavaRunner(args, listener, new File(option.getXsd()), getClasspathElements()).run();
             if (i != 0 && listener.getFirstError() != null) {
