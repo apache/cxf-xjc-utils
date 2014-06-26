@@ -133,6 +133,14 @@ public class DefaultValuePlugin {
             throw new RuntimeException(e);
         }
     }
+    private int getMaxOccurs(XSParticle particle) {
+        try {
+            Number o = (Number)particle.getClass().getMethod("getMaxOccurs").invoke(particle);
+            return o.intValue(); 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
         if (!active) {
@@ -173,7 +181,7 @@ public class DefaultValuePlugin {
                 if (xsType != null 
                     && xsType.isComplexType()
                     && ((containsDefaultValue(outline, f) && complexTypes)
-                        || (particle != null && getMinOccurs(particle) != 0))) {
+                        || (particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null) {

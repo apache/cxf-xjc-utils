@@ -133,4 +133,19 @@
     
     <xs:element name="fooElement" type="tns:foo"/>
     
+    
+	<xs:element name="itemRedemption">
+      <xs:complexType>
+      	<xs:sequence>
+	      <xs:element name="userId" type="xs:string" />
+       	  <xs:element name="redemptions" maxOccurs="unbounded" type="tns:externalItem" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  
+    <xs:complexType name="externalItem">
+      <xs:sequence>
+        <xs:element minOccurs="0" name="redemptionNumber" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>    
 </xs:schema>
