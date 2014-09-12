@@ -68,7 +68,7 @@ public class Bug986Plugin {
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
         // kind of a bogus thing to have to do to workaround bug:
         // https://java.net/jira/browse/JAXB-986
-        LOG.info("Running Bug986Plugin plugin.");
+        LOG.fine("Running Bug986Plugin plugin.");
         for (ClassOutline classOutline : outline.getClasses()) {
             Map<String, JFieldVar> fields = classOutline.implClass.fields();
             for (JFieldVar field : fields.values()) {
