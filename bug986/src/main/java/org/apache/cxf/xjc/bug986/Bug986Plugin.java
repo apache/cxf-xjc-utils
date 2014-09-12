@@ -61,7 +61,8 @@ public class Bug986Plugin {
     }
 
     public String getUsage() {
-        return "  -Xbug986             : Activate plugin remove XmlSchemaType(anySimpleType) from fields that shouldn't have it.";
+        return "  -Xbug986             : Activate plugin remove XmlSchemaType(anySimpleType)"
+            + " from fields that shouldn't have it.";
     }
 
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
