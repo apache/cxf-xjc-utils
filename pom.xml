@@ -65,6 +65,7 @@
         <module>wsdlextension</module>
         <module>wsdlextension-test</module>
         <module>bug671</module>
+        <module>bug986</module>
         <module>property-listener</module>
         <module>javadoc</module>
         <module>runtime</module>
@@ -441,6 +442,56 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                	<groupId>org.eclipse.m2e</groupId>
+                	<artifactId>lifecycle-mapping</artifactId>
+                	<version>1.0.0</version>
+                	<configuration>
+                		<lifecycleMappingMetadata>
+                			<pluginExecutions>
+                				<pluginExecution>
+                					<pluginExecutionFilter>
+                						<groupId>
+                							org.apache.maven.plugins
+                						</groupId>
+                						<artifactId>
+                							maven-checkstyle-plugin
+                						</artifactId>
+                						<versionRange>
+                							[2.9.1,)
+                						</versionRange>
+                						<goals>
+                							<goal>checkstyle</goal>
+                						</goals>
+                					</pluginExecutionFilter>
+                					<action>
+                						<ignore></ignore>
+                					</action>
+                				</pluginExecution>
+                				<pluginExecution>
+                					<pluginExecutionFilter>
+                						<groupId>
+                							org.apache.maven.plugins
+                						</groupId>
+                						<artifactId>
+                							maven-pmd-plugin
+                						</artifactId>
+                						<versionRange>
+                							[3.0.1,)
+                						</versionRange>
+                						<goals>
+                							<goal>check</goal>
+                						</goals>
+                					</pluginExecutionFilter>
+                					<action>
+                						<ignore></ignore>
+                					</action>
+                				</pluginExecution>
+                			</pluginExecutions>
+                		</lifecycleMappingMetadata>
+                	</configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
