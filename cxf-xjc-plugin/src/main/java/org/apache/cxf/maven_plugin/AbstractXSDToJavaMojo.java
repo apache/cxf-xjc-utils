@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenSession;
@@ -261,7 +262,12 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         request.setMirrors(session.getRequest().getMirrors());
         request.setProxies(session.getRequest().getProxies());
         request.setLocalRepository(session.getLocalRepository());
-        request.setRemoteRepositories(session.getRequest().getRemoteRepositories());
+        List<ArtifactRepository> r = new ArrayList<ArtifactRepository>();
+        r.addAll(project.getPluginArtifactRepositories());
+        r.addAll(project.getRemoteArtifactRepositories());
+        r.addAll(session.getRequest().getRemoteRepositories());
+        r.addAll(session.getRequest().getPluginArtifactRepositories());
+        request.setRemoteRepositories(r);
         ArtifactResolutionResult result = repository.resolve(request);
         List<File> files = new ArrayList<File>();
         for (Artifact a : result.getArtifacts()) {
