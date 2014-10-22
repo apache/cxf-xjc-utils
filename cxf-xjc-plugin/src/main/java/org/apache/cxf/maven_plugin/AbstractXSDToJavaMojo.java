@@ -21,6 +21,7 @@ package org.apache.cxf.maven_plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -114,16 +115,25 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     private URI mapLocation(String s) throws MojoExecutionException {
         try {
-            File file = new File(s);
+            File file = new File(s).getAbsoluteFile();
             URI uri;
             if (file.exists()) {
                 uri = file.toURI();
             } else {
-                file = new File(project.getBasedir(), s);
+                file = new File(project.getBasedir(), s).getAbsoluteFile();
                 if (file.exists()) {
                     uri = file.toURI();
                 } else {
-                    uri = new URI(s);
+                    try {
+                        uri = new URI(s);
+                    } catch (URISyntaxException use) {
+                        file = new File(s).getAbsoluteFile();
+                        if (file.getParentFile().exists()) {
+                            return file.toURI();
+                        } else {
+                            throw use;
+                        }
+                    }
                 }
             }
             if ("classpath".equals(uri.getScheme())) {
@@ -309,7 +319,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             }
         }        
     }
-    private String[] getArguments(XsdOption option, String outputDir) throws MojoExecutionException {
+    private String[] getArguments(XsdOption option, String outputDir) 
+        throws MojoExecutionException, MalformedURLException {
+        
         List<URL> newCp = new ArrayList<URL>();
         List<String> list = new ArrayList<String>();
         if (extensions != null && extensions.size() > 0) {
@@ -317,7 +329,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 for (String ext : extensions) {
                     for (File file : resolve(ext)) {
                         list.add("-classpath");
-                        list.add(file.getAbsolutePath());
+                        list.add(file.toURI().toURL().toExternalForm());
                         newCp.add(file.toURI().toURL());
                     }
                 }
@@ -410,7 +422,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         
         File file = null;
         try {
-            // file = new File("/tmp/test.jar");
+            //file = new File("Y:\\Users\\dkulp\\tmp\\test.jar");
             file = File.createTempFile("cxf-xjc-plugin", ".jar");
             file.deleteOnExit();
             
@@ -422,10 +434,13 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             attr.setName("Class-Path");
             StringBuilder b = new StringBuilder(8000);
             for (String cp : getClasspathElements()) {
-                b.append(cp).append(' ');
+                URI uri = mapLocation(cp);
+                if (uri != null) {
+                    b.append(uri.toString()).append(' ');
+                }
             }
             for (Artifact a : pluginArtifacts) {
-                b.append(a.getFile().getAbsolutePath()).append(' ');
+                b.append(a.getFile().toURI().toURL().toExternalForm()).append(' ');
             }
             attr.setValue(b.toString());
             manifest.getMainSection().addConfiguredAttribute(attr);
@@ -435,6 +450,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             attr.setValue(XSDToJavaRunner.class.getName());
             manifest.getMainSection().addConfiguredAttribute(attr);
 
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Manifest: " + manifest);
+            }
+            
             jar.addConfiguredManifest(manifest);
             jar.createArchive();
 
@@ -460,6 +479,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             StringBuilder message = new StringBuilder();
             
             public void consumeLine(String line) {
+                if (getLog().isDebugEnabled()) {
+                    getLog().debug(line);
+                }
                 if (line.startsWith("DONE")) {
                     buildContext.addMessage(file, linenum, column, message.toString(), severity, null);
                 } else if (line.startsWith("MSG: ")
