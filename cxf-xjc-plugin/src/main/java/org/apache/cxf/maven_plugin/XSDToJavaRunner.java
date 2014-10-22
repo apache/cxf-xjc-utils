@@ -19,6 +19,7 @@
 
 package org.apache.cxf.maven_plugin;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,11 +135,17 @@ public class XSDToJavaRunner {
         Model model = loadModel(opt); 
         if (model == null) {
             listener.message(xsdFile, "Failed to create model");
+            if (loader instanceof Closeable) {
+                ((Closeable)loader).close();
+            }
             return -1;
         }
         Outline outline = model.generateCode(opt, listener);
         if (outline == null) {
             listener.message(xsdFile, "Failed to generate code");
+            if (loader instanceof Closeable) {
+                ((Closeable)loader).close();
+            }
             return -1;
         }
 
@@ -148,7 +155,13 @@ public class XSDToJavaRunner {
             model.codeModel.build(cw);
         } catch (IOException e) {
             listener.error(e);
+            if (loader instanceof Closeable) {
+                ((Closeable)loader).close();
+            }
             return -1;
+        }
+        if (loader instanceof Closeable) {
+            ((Closeable)loader).close();
         }
         return 0;        
     }
