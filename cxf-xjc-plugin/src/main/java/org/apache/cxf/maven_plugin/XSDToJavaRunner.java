@@ -72,6 +72,16 @@ public class XSDToJavaRunner {
     final File xsdFile;
     
     
+    private static File getFile(String s) throws Exception {
+        File f = new File(s);
+        if (f.exists()) {
+            return f;
+        }
+        URI uri = new URI(s);
+        f = new File(uri);
+        return f;
+    }
+    
     public XSDToJavaRunner(String[] args, XJCErrorListener listener,
                            File file, List<String> cp) {
         this.args = args;
@@ -82,7 +92,8 @@ public class XSDToJavaRunner {
     public int run() throws Exception {
         List<URL> urls = new ArrayList<URL>();
         for (String s : cpList) {
-            urls.add(new File(s).toURI().toURL());
+            File file = getFile(s);
+            urls.add(file.toURI().toURL());
         }
         final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), 
                                                       this.getClass().getClassLoader());
@@ -195,9 +206,12 @@ public class XSDToJavaRunner {
             return (Model)getModelLoaderClass()
                 .getMethod("load", Options.class, JCodeModel.class, ErrorReceiver.class)
                 .invoke(null, opt, new JCodeModel(), listener);
+        } catch (Exception e) {
+            listener.error("Failed to create model", e);
         } catch (Throwable e) {
-            return null;
+            e.printStackTrace();
         }
+        return null;
     }
     
     public static class CustomizedLogic extends XMLSchemaInternalizationLogic {
@@ -319,11 +333,21 @@ public class XSDToJavaRunner {
 
     public static void main(String[] args) throws Exception {
         List<String> cplist = new ArrayList<String>();
+        for (int x = 0; x < args.length; x++) {
+            if ("-classpath".equals(args[x])) {
+                cplist.add(args[x + 1]);
+                File file = getFile(args[x + 1]);
+                if (file.exists()) {
+                    args[x + 1] = file.getAbsolutePath();
+                }
+                x++;
+            }
+        }
 
         BuildContext context = new XJCBuildContext();
         XJCErrorListener listener = new XJCErrorListener(context);
         
-        File outputFile = new File(args[args.length - 1]);
+        File outputFile = getFile(args[args.length - 1]);
         int i = new XSDToJavaRunner(args, listener, outputFile, cplist).run();
         System.exit(i);
     }
