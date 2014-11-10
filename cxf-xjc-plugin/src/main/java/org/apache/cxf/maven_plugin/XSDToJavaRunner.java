@@ -71,6 +71,13 @@ public class XSDToJavaRunner {
     final XJCErrorListener listener;
     final File xsdFile;
     
+    public XSDToJavaRunner(String[] args, XJCErrorListener listener,
+                           File file, List<String> cp) {
+        this.args = args;
+        this.listener = listener;
+        this.xsdFile = file;
+        this.cpList = cp;
+    }
     
     private static File getFile(String s) throws Exception {
         File f = new File(s);
@@ -82,13 +89,6 @@ public class XSDToJavaRunner {
         return f;
     }
     
-    public XSDToJavaRunner(String[] args, XJCErrorListener listener,
-                           File file, List<String> cp) {
-        this.args = args;
-        this.listener = listener;
-        this.xsdFile = file;
-        this.cpList = cp;
-    }
     public int run() throws Exception {
         List<URL> urls = new ArrayList<URL>();
         for (String s : cpList) {
