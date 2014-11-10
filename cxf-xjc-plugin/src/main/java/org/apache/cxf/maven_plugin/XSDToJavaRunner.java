@@ -79,21 +79,30 @@ public class XSDToJavaRunner {
         this.cpList = cp;
     }
     
-    private static File getFile(String s) throws Exception {
+    private static File getFile(String s, XJCErrorListener l) throws Exception {
         File f = new File(s);
         if (f.exists()) {
             return f;
         }
-        URI uri = new URI(s);
-        f = new File(uri);
-        return f;
+        try {
+            URI uri = new URI(s);
+            f = new File(uri);
+            return f;
+        } catch (Throwable t) {
+            if (l != null) {
+                l.debug("Could not find a file for " + s);
+            }
+            return null;
+        }
     }
     
     public int run() throws Exception {
         List<URL> urls = new ArrayList<URL>();
         for (String s : cpList) {
-            File file = getFile(s);
-            urls.add(file.toURI().toURL());
+            File file = getFile(s, listener);
+            if (file != null) {
+                urls.add(file.toURI().toURL());
+            }
         }
         final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), 
                                                       this.getClass().getClassLoader());
@@ -332,22 +341,26 @@ public class XSDToJavaRunner {
     }
 
     public static void main(String[] args) throws Exception {
+        BuildContext context = new XJCBuildContext();
+        XJCErrorListener listener = new XJCErrorListener(context);
+
         List<String> cplist = new ArrayList<String>();
         for (int x = 0; x < args.length; x++) {
             if ("-classpath".equals(args[x])) {
                 cplist.add(args[x + 1]);
-                File file = getFile(args[x + 1]);
-                if (file.exists()) {
+                File file = getFile(args[x + 1], listener);
+                if (file != null && file.exists()) {
                     args[x + 1] = file.getAbsolutePath();
                 }
                 x++;
             }
         }
 
-        BuildContext context = new XJCBuildContext();
-        XJCErrorListener listener = new XJCErrorListener(context);
         
-        File outputFile = getFile(args[args.length - 1]);
+        File outputFile = getFile(args[args.length - 1], listener);
+        if (outputFile == null) {
+            outputFile = new File(args[args.length - 1]);
+        }
         int i = new XSDToJavaRunner(args, listener, outputFile, cplist).run();
         System.exit(i);
     }
