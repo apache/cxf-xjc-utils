@@ -73,6 +73,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <fork>true</fork>
                     <xsdOptions>
                         <xsdOption>
                             <extension>true</extension>
