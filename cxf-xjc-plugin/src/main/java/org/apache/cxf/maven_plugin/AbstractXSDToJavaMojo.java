@@ -20,6 +20,7 @@
 package org.apache.cxf.maven_plugin;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -167,95 +168,125 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
         for (int x = 0; x < xsdOptions.length; x++) {
             ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                URI xsdURI = mapLocation(xsdOptions[x].getXsd());
-                URI basedir = project.getBasedir().toURI();
-                
-                String doneFileName = xsdURI.toString();
-                if (doneFileName.startsWith(basedir.toString())) {
-                    doneFileName = doneFileName.substring(basedir.toString().length());
-                }
-                
-                doneFileName = doneFileName.replace('?', '_')
-                    .replace('&', '_').replace('/', '_').replace('\\', '_')
-                    .replace(':', '_').replace('!', '_');
-                
-                // If URL to WSDL, replace ? and & since they're invalid chars for file names
-                File doneFile =
-                    new File(markerDirectory, "." + doneFileName + ".DONE");
-                
-                long srctimestamp = 0;
-                if ("file".equals(xsdURI.getScheme())) {
-                    srctimestamp = new File(xsdURI).lastModified();
-                } else {
-                    try {
-                        srctimestamp = xsdURI.toURL().openConnection().getDate();
-                    } catch (Exception e) {
-                        //ignore
+            final String[] xsdFiles = getXsdFiles(xsdOptions[x].getXsdDir(), xsdOptions[x].getXsd());
+            for (String xsdFile : xsdFiles) {
+                try {
+                    URI xsdURI = mapLocation(xsdFile);
+                    URI basedir = project.getBasedir().toURI();
+
+                    String doneFileName = xsdURI.toString();
+                    if (doneFileName.startsWith(basedir.toString())) {
+                        doneFileName = doneFileName.substring(basedir.toString().length());
                     }
-                }
-                if (xsdOptions[x].getBindingFile() != null) { 
-                    URI bindingURI = mapLocation(xsdOptions[x].getBindingFile());
-                    if ("file".equals(bindingURI.getScheme())) {
-                        long bts = new File(bindingURI).lastModified();
-                        if (bts > srctimestamp) {
-                            srctimestamp = bts;
+
+                    doneFileName = doneFileName.replace('?', '_')
+                        .replace('&', '_').replace('/', '_').replace('\\', '_')
+                        .replace(':', '_').replace('!', '_');
+
+                    // If URL to WSDL, replace ? and & since they're invalid chars for file names
+                    File doneFile =
+                        new File(markerDirectory, "." + doneFileName + ".DONE");
+
+                    long srctimestamp = 0;
+                    if ("file".equals(xsdURI.getScheme())) {
+                        srctimestamp = new File(xsdURI).lastModified();
+                    } else {
+                        try {
+                            srctimestamp = xsdURI.toURL().openConnection().getDate();
+                        } catch (Exception e) {
+                            //ignore
                         }
                     }
-                }
-
-                boolean doWork = false;
-                if (!doneFile.exists()) {
-                    doWork = true;
-                } else if (srctimestamp > doneFile.lastModified()) {
-                    doWork = true;
-                } else {
-                    File files[] = xsdOptions[x].getDependencies();
-                    if (files != null) {
-                        for (int z = 0; z < files.length; ++z) {
-                            if (files[z].lastModified() > doneFile.lastModified()) {
-                                doWork = true;
+                    if (xsdOptions[x].getBindingFile() != null) { 
+                        URI bindingURI = mapLocation(xsdOptions[x].getBindingFile());
+                        if ("file".equals(bindingURI.getScheme())) {
+                            long bts = new File(bindingURI).lastModified();
+                            if (bts > srctimestamp) {
+                                srctimestamp = bts;
                             }
                         }
                     }
-                }
-                
-                if (doWork) {
-                    try {
+
+                    boolean doWork = false;
+                    if (!doneFile.exists()) {
+                        doWork = true;
+                    } else if (srctimestamp > doneFile.lastModified()) {
+                        doWork = true;
+                    } else {
                         File files[] = xsdOptions[x].getDependencies();
                         if (files != null) {
                             for (int z = 0; z < files.length; ++z) {
                                 if (files[z].lastModified() > doneFile.lastModified()) {
-                                    buildContext.removeMessages(files[z]);
+                                    doWork = true;
                                 }
                             }
                         }
-                        removeMessages(xsdOptions[x].getXsd());
-                        removeMessages(xsdOptions[x].getBindingFile());
-                        int i = run(xsdOptions[x], outputDir);
-                        if (i == 0) {
-                            doneFile.delete();
-                            doneFile.createNewFile();
-                        }
-                        File dirs[] = xsdOptions[x].getDeleteDirs();
-                        if (dirs != null) {
-                            for (int idx = 0; idx < dirs.length; ++idx) {
-                                result = result && deleteDir(dirs[idx]);
-                            }
-                        }
-                        buildContext.refresh(outputDirFile);
-                    } catch (Exception e) {
-                        throw new MojoExecutionException(e.getMessage(), e);
                     }
+
+                    if (doWork) {
+                        try {
+                            File files[] = xsdOptions[x].getDependencies();
+                            if (files != null) {
+                                for (int z = 0; z < files.length; ++z) {
+                                    if (files[z].lastModified() > doneFile.lastModified()) {
+                                        buildContext.removeMessages(files[z]);
+                                    }
+                                }
+                            }
+                            removeMessages(xsdFile);
+                            removeMessages(xsdOptions[x].getBindingFile());
+                            int i = run(xsdOptions[x], xsdFile, outputDir);
+                            if (i == 0) {
+                                doneFile.delete();
+                                doneFile.createNewFile();
+                            }
+                            File dirs[] = xsdOptions[x].getDeleteDirs();
+                            if (dirs != null) {
+                                for (int idx = 0; idx < dirs.length; ++idx) {
+                                    result = result && deleteDir(dirs[idx]);
+                                }
+                            }
+                            buildContext.refresh(outputDirFile);
+                        } catch (Exception e) {
+                            throw new MojoExecutionException(e.getMessage(), e);
+                        }
+                    }
+
+                    if (!result) {
+                        throw new MojoExecutionException("Could not delete redundant dirs");
+                    }
+                } finally {
+                    Thread.currentThread().setContextClassLoader(origLoader);
                 }
-            
-                if (!result) {
-                    throw new MojoExecutionException("Could not delete redundant dirs");
-                }  
-            } finally {
-                Thread.currentThread().setContextClassLoader(origLoader);
             }
         }
+    }
+    
+    private String[] getXsdFiles(String xsdDir, String xsd) throws MojoExecutionException {
+        final String[] xsdFiles;
+        if (xsdDir != null && !xsdDir.isEmpty()) {
+            File dir = new File(xsdDir);
+            if (!dir.isDirectory()) {
+                throw new MojoExecutionException("Error, xsdDir \"" + xsdDir + "\" does not exist.");
+            }  
+            String[] fileList = dir.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".xsd");
+                }
+            });
+            if (fileList == null || fileList.length == 0) {
+                throw new MojoExecutionException("Error, xsdDir \"" + xsdDir + "\" does not contain any *.xsd files.");
+            }
+            xsdFiles = new String[fileList.length];
+            for (int i = 0; i < fileList.length; ++i) {
+                xsdFiles[i] = xsdDir + (xsdDir.endsWith(File.separator) ? "" : File.separator) + fileList[i];
+            }
+        } else {
+            xsdFiles = new String[1];
+            xsdFiles[0] = xsd;
+        }
+        return xsdFiles;
     }
     
     private List<File> resolve(String artifactDescriptor) {
@@ -293,12 +324,12 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         return project.getCompileClasspathElements();
     }
     
-    private int run(XsdOption option, String outputDir) throws Exception {
+    private int run(XsdOption option, String xsdFile, String outputDir) throws Exception {
         if (!fork) {
             String[] args = getArguments(option, outputDir);
             this.getLog().debug("Args: " + Arrays.asList(args));
             XJCErrorListener listener = new XJCErrorListener(buildContext);
-            int i = new XSDToJavaRunner(args, listener, new File(option.getXsd()), getClasspathElements()).run();
+            int i = new XSDToJavaRunner(args, listener, new File(xsdFile), getClasspathElements()).run();
             if (i != 0 && listener.getFirstError() != null) {
                 throw listener.getFirstError();
             }
@@ -363,10 +394,14 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (getLog().isDebugEnabled()) {
             list.add("-verbose");            
         }
-        list.add("-d");
-        list.add(outputDir);
-        list.add(mapLocation(option.getXsd()).toString());
-       
+
+        String[] xsdFiles = getXsdFiles(option.getXsdDir(), option.getXsd());
+        for (String xsdFile : xsdFiles) {
+            list.add("-d");
+            list.add(outputDir);
+            list.add(mapLocation(xsdFile).toString());
+        }
+
         return list.toArray(new String[list.size()]);
         
     }
