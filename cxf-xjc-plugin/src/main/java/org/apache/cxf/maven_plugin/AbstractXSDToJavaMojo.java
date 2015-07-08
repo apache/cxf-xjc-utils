@@ -258,7 +258,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     
-    private List<File> resolve(String artifactDescriptor) {
+    private List<File> resolve(String artifactDescriptor) throws MojoExecutionException {
         String[] s = artifactDescriptor.split(":");
 
         String type = s.length >= 4 ? s[3] : "jar";
@@ -281,6 +281,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         ArtifactResolutionResult result = repository.resolve(request);
         List<File> files = new ArrayList<File>();
         for (Artifact a : result.getArtifacts()) {
+            if (a.getFile() == null) {
+                throw new MojoExecutionException("Unable to resolve " + a.toString()
+                        + " while resolving " + artifactDescriptor);
+            }
             files.add(a.getFile());
         }
         if (!files.contains(artifact.getFile())) {
