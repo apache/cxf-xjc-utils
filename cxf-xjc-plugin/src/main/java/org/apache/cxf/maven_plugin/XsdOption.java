@@ -24,6 +24,7 @@ import java.util.List;
 
 public class XsdOption {
     String xsd;
+    String xsdDir;
     String packagename;
     String bindingFile;
     File dependencies[];
@@ -43,6 +44,12 @@ public class XsdOption {
     }
     public void setXsd(String x) {
         this.xsd = x;
+    }
+    public String getXsdDir() {
+        return xsdDir;
+    }
+    public void setXsdDir(String x) {
+        this.xsdDir = x;
     }
     public String getBindingFile() {
         return bindingFile;
