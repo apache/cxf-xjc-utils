@@ -84,7 +84,7 @@ public class Bug986Plugin {
                         if (sw.toString().equals("\"anySimpleType\"")) {
                             if (field.type().fullName().startsWith("java.util.List")) {
                                 //if it's a list of non-string types, we have to remove
-                                if (!!field.type().fullName().contains("<java.lang.String>")) {
+                                if (!field.type().fullName().contains("<java.lang.String>")) {
                                     toRemove.add(j);
                                 }
                             } else if (!"java.lang.String".equals(field.type().fullName())) {
