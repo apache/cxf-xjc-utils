@@ -89,7 +89,7 @@ public class DefaultValuePlugin {
         
         if (args[index].startsWith("-Xdv")) {
             ret = 1;                    
-            if (args[index].equals("-Xts:optional")) {
+            if (args[index].equals("-Xdv:optional")) {
                 complexTypes = true;
             }
             if (!opt.activePlugins.contains(plugin)) {
@@ -177,7 +177,6 @@ public class DefaultValuePlugin {
                     isRequiredAttr = attributeUse.isRequired();
                 }
 
-                
                 if (xsType != null 
                     && xsType.isComplexType()
                     && ((containsDefaultValue(outline, f) && complexTypes)
