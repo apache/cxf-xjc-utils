@@ -100,6 +100,15 @@ public class DefaultValuePlugin {
         return ret;
     }
 
+    private boolean isAbstract(Outline outline, FieldOutline field) {
+        for (ClassOutline classOutline : outline.getClasses()) {
+            if (classOutline.implClass == field.getRawType() 
+                && classOutline.implClass.isAbstract()) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     private boolean containsDefaultValue(Outline outline, FieldOutline field) {
         ClassOutline fClass = null;
@@ -125,6 +134,10 @@ public class DefaultValuePlugin {
         return false;
     }
 
+    private boolean isElementRequired(XSParticle particle) {
+        return particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1;
+    }
+    
     private int getMinOccurs(XSParticle particle) {
         try {
             Number o = (Number)particle.getClass().getMethod("getMinOccurs").invoke(particle);
@@ -179,8 +192,9 @@ public class DefaultValuePlugin {
 
                 if (xsType != null 
                     && xsType.isComplexType()
-                    && ((containsDefaultValue(outline, f) && complexTypes)
-                        || (particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1))) {
+                    && !isAbstract(outline, f)
+                    && ((complexTypes && containsDefaultValue(outline, f)) 
+                        || isElementRequired(particle))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null) {
