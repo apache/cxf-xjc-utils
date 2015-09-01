@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.apache.cxf.xjc-utils</groupId>
         <artifactId>xjc-utils</artifactId>
-        <version>3.0.5</version>
+        <version>3.0.6-SNAPSHOT</version>
     </parent>
 
 
