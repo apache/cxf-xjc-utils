@@ -20,9 +20,12 @@ package org.apache.cxf.xjc.javadoc;
 
 import java.util.Collection;
 
+import javax.xml.namespace.QName;
+
 import org.xml.sax.ErrorHandler;
 
 import com.sun.tools.xjc.Options;
+import com.sun.tools.xjc.model.CEnumLeafInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.EnumOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
@@ -87,11 +90,17 @@ public class JavadocInserter {
     }
 
     private boolean isCustomBindingApplied(EnumOutline enumOutline) {
-        String defaultComment = Messages.format("ClassSelector.JavadocHeading", enumOutline.target
-            .getTypeName().getLocalPart());
+        CEnumLeafInfo target = enumOutline.target;
+        QName typeName = target.getTypeName();
+        // typeName may be null on anonymous simple types
+        if (typeName == null) {
+            return false;
+        }
+        String defaultComment = Messages.format("ClassSelector.JavadocHeading",
+                typeName.getLocalPart());
         // not very clean but the only way of determining whether Javadoc
         // customization has been applied
-        return !enumOutline.target.javadoc.startsWith(defaultComment);
+        return !target.javadoc.startsWith(defaultComment);
     }
 
 }
