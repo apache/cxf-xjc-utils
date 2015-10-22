@@ -156,6 +156,16 @@ public class JavadocPluginTest extends Assert {
         assertThat(getterJavadoc, javadocContains("Documentation of attribute"));
     }
 
+    @Test
+    public void testAnonymousEnum() throws Exception {
+        String fileName = "anonymousEnum.xsd";
+        assertProcessedSuccessful(fileName, "-b", getAbsolutePath("anonymousEnum-javadoc-bindings.xjb"));
+
+        CompilationUnit compilationUnit = parseSourceFile("AnonymousTypesafeEnumClass.java");
+        Javadoc topLevelTypeJavadoc = getTopLevelEnum(compilationUnit).getJavadoc();
+        assertThat(topLevelTypeJavadoc, javadocContains("Documentation of anonymous enum simpleType"));
+    }
+
     private void assertProcessedSuccessful(String fileName, String... params) throws Exception {
         String xsdPath = getAbsolutePath(fileName);
         List<String> args = new ArrayList<String>(Arrays.asList(xsdPath, "-Xjavadoc", "-d", OUTPUT_DIR));
