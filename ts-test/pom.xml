@@ -54,8 +54,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 
@@ -79,7 +79,7 @@
                             <extension>true</extension>
                             <xsd>${basedir}/src/test/resources/schemas/configuration/foo.xsd</xsd>
                             <extensionArgs>
-                                <arg>-Xts:style:org.apache.commons.lang.builder.ToStringStyle.DEFAULT_STYLE</arg>
+                                <arg>-Xts:style:org.apache.commons.lang3.builder.ToStringStyle.DEFAULT_STYLE</arg>
                             </extensionArgs>
                         </xsdOption>
                     </xsdOptions>

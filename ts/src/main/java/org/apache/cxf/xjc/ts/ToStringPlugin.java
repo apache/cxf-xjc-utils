@@ -63,7 +63,7 @@ public class ToStringPlugin {
             +  "  -Xts:style:simple    : Have toString produce single line terse output\n"
             +  "         equivalent to: "
             +  "-Xts:style:org.apache.cxf.xjc.runtime.JAXBToStringStyle.SIMPLE_STYLE\n"
-            +  "  -Xts:style:org.apache.commons.lang.builder.ToStringStyle.FIELD : The full class+field\n"
+            +  "  -Xts:style:org.apache.commons.lang3.builder.ToStringStyle.FIELD : The full class+field\n"
             +  "         name of the ToStringStyle to use.";
     }
 
@@ -100,7 +100,7 @@ public class ToStringPlugin {
         }
 
         final JClass toStringDelegateImpl = outline.getCodeModel()
-            .ref("org.apache.commons.lang.builder.ToStringBuilder");
+            .ref("org.apache.commons.lang3.builder.ToStringBuilder");
         final JClass styleClass = outline.getCodeModel().ref(styleClassName);
         final JFieldRef toStringDelegateStyleParam = styleClass.staticRef(styleFieldName);
         

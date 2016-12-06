@@ -21,9 +21,9 @@ package org.apache.cxf.xjc.runtime;
 
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /*
  * Override default styles to recognise JAXBElement as needing introspection
@@ -72,7 +72,7 @@ class JAXBToStringStyleImpl extends ToStringStyle {
      * Introspect into JAXBElement as a special case as it does not have a
      * toString() and we loose the content
      * 
-     * @see org.apache.commons.lang.builder.ToStringStyle
+     * @see org.apache.commons.lang3.builder.ToStringStyle
      */
     @Override
     protected void appendDetail(StringBuffer buffer, String fieldName, Object value) {

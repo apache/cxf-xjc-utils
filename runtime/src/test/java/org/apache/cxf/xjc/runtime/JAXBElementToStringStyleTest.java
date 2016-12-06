@@ -23,7 +23,7 @@ package org.apache.cxf.xjc.runtime;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import org.junit.Assert;
 import org.junit.Test;
