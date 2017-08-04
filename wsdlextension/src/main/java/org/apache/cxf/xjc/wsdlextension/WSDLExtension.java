@@ -35,7 +35,7 @@ import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JPrimitiveType;
+import com.sun.codemodel.JType;
 import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
@@ -87,7 +87,7 @@ public class WSDLExtension {
                                                              "getElementType");
         getElementTypeMethod.body()._return(JExpr.direct("elementType"));
 
-        JMethod setElementTypeMethod = implementation.method(JMod.PUBLIC, JPrimitiveType.parse(co
+        JMethod setElementTypeMethod = implementation.method(JMod.PUBLIC, JType.parse(co
             .parent().getCodeModel(), "void"), "setElementType");
         setElementTypeMethod.param(QName.class, "type");
         setElementTypeMethod.body().directStatement("this.elementType = type;");
@@ -96,7 +96,7 @@ public class WSDLExtension {
                                                              "getRequired");
         getRequiredMethod.body()._return(JExpr.direct("required == null ? false : required"));
 
-        JMethod setRequiredMethod = implementation.method(JMod.PUBLIC, JPrimitiveType.parse(co
+        JMethod setRequiredMethod = implementation.method(JMod.PUBLIC, JType.parse(co
             .parent().getCodeModel(), "void"), "setRequired");
         setRequiredMethod.param(Boolean.class, "required");
         setRequiredMethod.body().directStatement("this.required = required;");

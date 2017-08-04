@@ -118,10 +118,9 @@ public class PropertyJavadoc {
         if (options.enableIntrospection) {
             return ((type.isPrimitive() && type.boxify().getPrimitiveType() == codeModel.BOOLEAN)
                 ? "is" : "get") + fieldOutline.getPropertyInfo().getName(true);
-        } else {
-            return (type.boxify().getPrimitiveType() == codeModel.BOOLEAN ? "is" : "get")
-                   + fieldOutline.getPropertyInfo().getName(true);
         }
+        return (type.boxify().getPrimitiveType() == codeModel.BOOLEAN ? "is" : "get")
+               + fieldOutline.getPropertyInfo().getName(true);
     }
 
 }

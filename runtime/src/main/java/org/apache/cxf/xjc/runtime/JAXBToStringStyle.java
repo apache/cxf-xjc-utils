@@ -21,7 +21,6 @@ package org.apache.cxf.xjc.runtime;
 
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -55,9 +54,9 @@ class JAXBToStringStyleImpl extends ToStringStyle {
         super();
         if (multiLine) {
             this.setContentStart("[");
-            this.setFieldSeparator(SystemUtils.LINE_SEPARATOR + "  ");
+            this.setFieldSeparator(System.lineSeparator() + "  ");
             this.setFieldSeparatorAtStart(true);
-            this.setContentEnd(SystemUtils.LINE_SEPARATOR + "]");
+            this.setContentEnd(System.lineSeparator() + "]");
         } else {
             // simple
             this.setUseClassName(false);

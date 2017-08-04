@@ -131,9 +131,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                         file = new File(s).getAbsoluteFile();
                         if (file.getParentFile().exists()) {
                             return file.toURI();
-                        } else {
-                            throw use;
                         }
+                        throw use;
                     }
                 }
             }
