@@ -450,9 +450,9 @@ public class DefaultValuePlugin {
         JFieldRef fr = JExpr.ref(fieldName);
         method.body().assign(fr, var);
         
-        method = dc.getMethod("unset" + fo.getPropertyInfo().getName(true), new JType[0]);
-        if (method != null) {
-            dc.methods().remove(method);
+        JMethod oldMethod = dc.getMethod("unset" + fo.getPropertyInfo().getName(true), new JType[0]);
+        if (oldMethod != null) {
+            dc.methods().remove(oldMethod);
         }
         method = dc.method(mods, method.type(), "unset" + fo.getPropertyInfo().getName(true));
         method.body().assign(fr, JExpr._null());
