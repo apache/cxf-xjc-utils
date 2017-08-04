@@ -68,6 +68,7 @@ public class DefaultValuePlugin {
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
     private boolean complexTypes;
     private boolean active;
+    private boolean attributes;
     
     public DefaultValuePlugin() {
     }
@@ -78,6 +79,7 @@ public class DefaultValuePlugin {
 
     public String getUsage() {
         return   "  -Xdv                 : Initialize fields mapped from elements with their default values\n"
+               + "  -Xdv:attributes      : Also initialize fields mapped from attributes with their default values\n"
                + "  -Xdv:optional        : Initialize fields mapped from elements with their default values\n"
                + "                         for elements with minOccurs=0 but with complexTypes containing \n"
                + "                         fields with default values.";
@@ -89,8 +91,11 @@ public class DefaultValuePlugin {
         
         if (args[index].startsWith("-Xdv")) {
             ret = 1;                    
-            if (args[index].equals("-Xdv:optional")) {
+            if (args[index].indexOf(":optional") != -1) {
                 complexTypes = true;
+            }
+            if (args[index].indexOf(":attributes") != -1) {
+                attributes = true;
             }
             if (!opt.activePlugins.contains(plugin)) {
                 opt.activePlugins.add(plugin);
@@ -204,7 +209,7 @@ public class DefaultValuePlugin {
 
                 JExpression dvExpr = null;
                 if (null != xmlDefaultValue && null != xmlDefaultValue.value) {
-                    dvExpr = getDefaultValueExpression(f, co, outline, xsType, isElement,
+                    dvExpr = getDefaultValueExpression(f, co, outline, xsType, isElement | attributes,
                                                        xmlDefaultValue, false);
                 }
                  
@@ -215,11 +220,15 @@ public class DefaultValuePlugin {
                         .equals(xsType.getOwnerSchema().getTargetNamespace())) {
                     //non-primitive attribute, may still be able to convert it, but need to do
                     //a bunch more checks and changes to setters and isSet and such
-                    dvExpr = 
-                        getDefaultValueExpression(f, co, outline, xsType, isElement, xmlDefaultValue, true);
                     
-                    updateSetter(co, f, co.implClass);
-                    updateGetter(co, f, co.implClass, dvExpr, true);                    
+                    dvExpr = 
+                        getDefaultValueExpression(f, co, outline, xsType, isElement | attributes, 
+                                                  xmlDefaultValue, true);
+                    
+                    if (dvExpr != null) {
+                        updateSetter(co, f, co.implClass);
+                        updateGetter(co, f, co.implClass, dvExpr, true);
+                    }
                 } else if (null == dvExpr) {
                     JType type = f.getRawType();
                     String typeName = type.fullName();
@@ -424,6 +433,9 @@ public class DefaultValuePlugin {
         if (LOG.isLoggable(Level.FINE)) {
             LOG.fine("Updating setter: " + setterName);
         }
+        if (method == null) {
+            return;
+        }
         JDocComment doc = method.javadoc();
         // remove existing method and define new one
         dc.methods().remove(method);
@@ -438,6 +450,10 @@ public class DefaultValuePlugin {
         JFieldRef fr = JExpr.ref(fieldName);
         method.body().assign(fr, var);
         
+        method = dc.getMethod("unset" + fo.getPropertyInfo().getName(true), new JType[0]);
+        if (method != null) {
+            dc.methods().remove(method);
+        }
         method = dc.method(mods, method.type(), "unset" + fo.getPropertyInfo().getName(true));
         method.body().assign(fr, JExpr._null());
         
