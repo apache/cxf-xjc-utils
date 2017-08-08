@@ -202,7 +202,8 @@ public class DefaultValuePlugin {
                         || isElementRequired(particle))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
-                    if (var != null) {
+                    if (var != null 
+                        && !"javax.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
                         var.init(JExpr._new(f.getRawType()));
                     }
                 }
