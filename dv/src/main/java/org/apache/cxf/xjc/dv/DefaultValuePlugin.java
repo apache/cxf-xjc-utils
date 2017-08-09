@@ -68,7 +68,6 @@ public class DefaultValuePlugin {
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
     private boolean complexTypes;
     private boolean active;
-    private boolean attributes;
     
     public DefaultValuePlugin() {
     }
@@ -79,7 +78,6 @@ public class DefaultValuePlugin {
 
     public String getUsage() {
         return   "  -Xdv                 : Initialize fields mapped from elements with their default values\n"
-               + "  -Xdv:attributes      : Also initialize fields mapped from attributes with their default values\n"
                + "  -Xdv:optional        : Initialize fields mapped from elements with their default values\n"
                + "                         for elements with minOccurs=0 but with complexTypes containing \n"
                + "                         fields with default values.";
@@ -93,9 +91,6 @@ public class DefaultValuePlugin {
             ret = 1;                    
             if (args[index].indexOf(":optional") != -1) {
                 complexTypes = true;
-            }
-            if (args[index].indexOf(":attributes") != -1) {
-                attributes = true;
             }
             if (!opt.activePlugins.contains(plugin)) {
                 opt.activePlugins.add(plugin);
@@ -210,27 +205,26 @@ public class DefaultValuePlugin {
 
                 JExpression dvExpr = null;
                 if (null != xmlDefaultValue && null != xmlDefaultValue.value) {
-                    dvExpr = getDefaultValueExpression(f, co, outline, xsType, isElement | attributes,
+                    dvExpr = getDefaultValueExpression(f, co, outline, xsType, isElement,
                                                        xmlDefaultValue, false);
                 }
                  
                 if (null == dvExpr
-                    && !isElement && !isRequiredAttr
-                    && xsType != null && xsType.getOwnerSchema() != null
-                    && !"http://www.w3.org/2001/XMLSchema"
-                        .equals(xsType.getOwnerSchema().getTargetNamespace())) {
-                    //non-primitive attribute, may still be able to convert it, but need to do
+                    && !isElement 
+                    && !isRequiredAttr
+                    && xsType != null && xsType.getOwnerSchema() != null) {
+                    //attribute, may still be able to convert it, but need to do
                     //a bunch more checks and changes to setters and isSet and such
-                    
+
                     dvExpr = 
-                        getDefaultValueExpression(f, co, outline, xsType, isElement | attributes, 
+                        getDefaultValueExpression(f, co, outline, xsType, false, 
                                                   xmlDefaultValue, true);
                     
                     if (dvExpr != null) {
                         updateSetter(co, f, co.implClass);
                         updateGetter(co, f, co.implClass, dvExpr, true);
                     }
-                } else if (null == dvExpr) {
+                } else if (null == dvExpr) {                    
                     JType type = f.getRawType();
                     String typeName = type.fullName();
                     if ("javax.xml.datatype.Duration".equals(typeName)) {
@@ -238,6 +232,7 @@ public class DefaultValuePlugin {
                     }
                     continue;
                 } else {
+                    System.out.println("UPDATE 3!!!!!");
                     updateGetter(co, f, co.implClass, dvExpr, false);                    
                 }
             }
@@ -378,7 +373,6 @@ public class DefaultValuePlugin {
                                                false);
             }
         }
-        // TODO: GregorianCalendar, ...
         return dv;
     }
     
