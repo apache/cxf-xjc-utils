@@ -20,6 +20,8 @@
 package org.apache.cxf.xjc.dv;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,7 @@ import javax.xml.namespace.QName;
 import org.xml.sax.ErrorHandler;
 
 import com.sun.codemodel.ClassType;
+import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
@@ -40,6 +43,7 @@ import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldRef;
 import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JOp;
 import com.sun.codemodel.JTryBlock;
@@ -50,6 +54,7 @@ import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
 import com.sun.tools.xjc.outline.Outline;
+import com.sun.tools.xjc.outline.PackageOutline;
 import com.sun.tools.xjc.util.NamespaceContextAdapter;
 import com.sun.xml.xsom.XSAttributeDecl;
 import com.sun.xml.xsom.XSAttributeUse;
@@ -223,6 +228,12 @@ public class DefaultValuePlugin {
                     if (dvExpr != null) {
                         updateSetter(co, f, co.implClass);
                         updateGetter(co, f, co.implClass, dvExpr, true);
+                    } else {
+                        JType type = f.getRawType();
+                        String typeName = type.fullName();
+                        if ("javax.xml.datatype.Duration".equals(typeName)) {
+                            updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
+                        }
                     }
                 } else if (null == dvExpr) {                    
                     JType type = f.getRawType();
@@ -230,9 +241,44 @@ public class DefaultValuePlugin {
                     if ("javax.xml.datatype.Duration".equals(typeName)) {
                         updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
                     }
-                    continue;
                 } else {
                     updateGetter(co, f, co.implClass, dvExpr, false);                    
+                }
+            }
+        }
+        
+        for (PackageOutline po :outline.getAllPackageContexts()) {
+            //also fixup some unecessary casts
+            JDefinedClass cls = po.objectFactoryGenerator().getObjectFactory();
+            for (JMethod m : cls.methods()) {
+                String tn = m.type().fullName();
+                if (tn.startsWith("javax.xml.bind.JAXBElement<java.util.List<") 
+                    || tn.startsWith("javax.xml.bind.JAXBElement<byte[]>")) {
+                    JBlock b = m.body();
+                    
+                    for (Object o : b.getContents()) {
+                        try {
+                            Field f = o.getClass().getDeclaredField("expr");
+                            f.setAccessible(true);
+                            JInvocation ji = (JInvocation)f.get(o);
+                            
+                            f = JInvocation.class.getDeclaredField("args");
+                            f.setAccessible(true);
+                            @SuppressWarnings("unchecked")
+                            List<JExpression> args = (List<JExpression>)f.get(ji);
+                            
+                            JExpression cast = args.get(args.size() - 1);
+                            if (cast.getClass().getSimpleName().equals("JCast")) {
+                                f = cast.getClass().getDeclaredField("object");
+                                f.setAccessible(true);
+                                JExpression exp = (JExpression)f.get(cast);
+                                args.remove(args.size() - 1);
+                                args.add(exp);
+                            }
+                        } catch (Throwable t) {
+                            //ignore
+                        }
+                    }
                 }
             }
         }
@@ -463,5 +509,4 @@ public class DefaultValuePlugin {
     public void onActivated(Options opts) {
         active = true;
     }
-
 }
