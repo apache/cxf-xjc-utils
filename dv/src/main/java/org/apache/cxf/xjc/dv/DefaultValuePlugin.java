@@ -232,7 +232,6 @@ public class DefaultValuePlugin {
                     }
                     continue;
                 } else {
-                    System.out.println("UPDATE 3!!!!!");
                     updateGetter(co, f, co.implClass, dvExpr, false);                    
                 }
             }
