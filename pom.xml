@@ -44,7 +44,7 @@
     </prerequisites>
 
     <properties>
-        <cxf-buildtools-version>3.3.0</cxf-buildtools-version>
+        <cxf-buildtools-version>3.3.1-SNAPSHOT</cxf-buildtools-version>
         <jdk.version>1.8</jdk.version>
 
         <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
