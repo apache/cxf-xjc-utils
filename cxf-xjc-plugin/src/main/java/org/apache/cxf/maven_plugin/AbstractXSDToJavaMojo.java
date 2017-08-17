@@ -53,7 +53,7 @@ import org.codehaus.plexus.util.cli.StreamConsumer;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
- * @description CXF XSD To Java Tool
+ * CXF XSD To Java Tool
  */
 public abstract class AbstractXSDToJavaMojo extends AbstractMojo {   
     @Component
