@@ -63,7 +63,7 @@ public class BooleanGetAndIsPlugin {
 
     private void processClass(ClassOutline clazz) {
         Collection<JMethod> methods = clazz.implClass.methods();
-        Map<String , JType> methodsToAdd = new HashMap<String , JType>();
+        Map<String, JType> methodsToAdd = new HashMap<String, JType>();
         for (JMethod method : methods) {
             if (method.name().startsWith(IS_PREFIX) && requiresGetter(methods, method)) {
                 methodsToAdd.put(method.name(), method.type());
