@@ -52,13 +52,12 @@ import com.sun.tools.xjc.reader.internalizer.AbstractReferenceFinderImpl;
 import com.sun.tools.xjc.reader.internalizer.DOMForest;
 import com.sun.tools.xjc.reader.xmlschema.parser.XMLSchemaInternalizationLogic;
 
-import org.apache.xml.resolver.CatalogManager;
-import org.apache.xml.resolver.tools.CatalogResolver;
-import org.sonatype.plexus.build.incremental.BuildContext;
-
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
+import org.apache.xml.resolver.CatalogManager;
+import org.apache.xml.resolver.tools.CatalogResolver;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * 

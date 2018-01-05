@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import org.apache.cxf.configuration.foo.Foo;
 import org.apache.cxf.configuration.foo.TpAddress;
 import org.apache.cxf.configuration.foo.TpAddressPresentation;
+
 import org.junit.Assert;
 import org.junit.Test;
 

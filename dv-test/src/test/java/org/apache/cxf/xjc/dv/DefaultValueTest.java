@@ -37,6 +37,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.cxf.configuration.foo.Foo;
 import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
+
 import org.junit.Assert;
 import org.junit.Test;
 

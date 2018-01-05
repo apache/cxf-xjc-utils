@@ -44,7 +44,7 @@
     </prerequisites>
 
     <properties>
-        <cxf-buildtools-version>3.3.0</cxf-buildtools-version>
+        <cxf-buildtools-version>3.3.1-SNAPSHOT</cxf-buildtools-version>
         <jdk.version>1.8</jdk.version>
 
         <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
@@ -385,6 +385,18 @@
                             <groupId>org.apache.cxf.build-utils</groupId>
                             <artifactId>cxf-buildtools</artifactId>
                             <version>${cxf-buildtools-version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>8.7</version>
+                            <exclusions>
+                                <!--  MCHECKSTYLE-156  -->
+                                <exclusion>
+                                    <groupId>com.sun</groupId>
+                                    <artifactId>tools</artifactId>
+                                </exclusion>
+                            </exclusions>
                         </dependency>
                     </dependencies>
                     <configuration>
