@@ -153,7 +153,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     public void execute() throws MojoExecutionException {
-        if (System.getProperty("java.version").startsWith("9")) {
+        if (isJava9Compatible()) {
             fork = true;
             additionalJvmArgs = "--add-modules java.activation,java.xml.bind,java.xml.ws " 
                     + "--add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED "
@@ -340,6 +340,15 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
         return project.getCompileClasspathElements();
+    }
+
+    protected boolean isJava9Compatible() {
+        String version = System.getProperty("java.version");
+        if (version.indexOf(".") > 0) {
+            version = version.substring(0, version.indexOf("."));
+        }
+        
+        return Integer.valueOf(version) >= 9;
     }
     
     private int run(XsdOption option, String xsdFile, String outputDir) throws Exception {
