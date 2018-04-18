@@ -157,6 +157,7 @@ public class XSDToJavaRunner {
                 catResolver.getCatalog().parseCatalog(catalogFile.getPath());
             }
         };
+
         for (URL url : urls) {
             opt.classpaths.add(url);
         }
@@ -164,7 +165,15 @@ public class XSDToJavaRunner {
             opt.target = SpecVersion.V2_1;
         }
         opt.setSchemaLanguage(Language.XMLSCHEMA);
-        opt.parseArguments(args);
+        // set up the context class loader so that the user-specified plugin
+        // on classpath can be loaded from there with jaxb-xjc 2.3.0
+        ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(opt.getUserClassLoader(origLoader));
+            opt.parseArguments(args);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origLoader);
+        }
         Model model = loadModel(opt); 
         if (model == null) {
             listener.message(xsdFile, "Failed to create model");
