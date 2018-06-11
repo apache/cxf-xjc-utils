@@ -92,6 +92,12 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     private boolean fork;
     
     /**
+     * 
+     */
+    @Parameter(defaultValue = "${project.build.sourceEncoding}")
+    private String encoding;
+    
+    /**
      * Sets the Java executable to use when fork parameter is <code>true</code>.
      */
     @Parameter(defaultValue = "${java.home}/bin/java")
@@ -421,7 +427,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (getLog().isDebugEnabled()) {
             list.add("-verbose");            
         }
-
+        list.add("-encoding");
+        list.add(encoding);
+        
         String[] xsdFiles = getXsdFiles(option.getXsdDir(), option.getXsd());
         for (String xsdFile : xsdFiles) {
             list.add("-d");
