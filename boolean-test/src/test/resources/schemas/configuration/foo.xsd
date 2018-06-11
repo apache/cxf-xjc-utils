@@ -48,8 +48,12 @@
     	</xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="foo">        
-        <xs:sequence>
+    <xs:complexType name="foo">   
+	    <xs:annotation>
+	      <xs:documentation>This is a test documentation with strange UTF chars:  Ã, Ã, ¢, â‚ €, für
+	      </xs:documentation>
+	    </xs:annotation>     
+	    <xs:sequence>
 	    <xs:element name="pageColor" type="tns:pageColor" minOccurs="0"></xs:element>
             <xs:element name="driving" type="tns:drivingDecision" default="LeftTurn" minOccurs="0"></xs:element>
             <xs:element name="stringElem" type="xs:string" default="hello" minOccurs="0"></xs:element>
