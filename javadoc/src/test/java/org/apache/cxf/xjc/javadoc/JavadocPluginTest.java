@@ -180,7 +180,7 @@ public class JavadocPluginTest extends Assert {
     }
 
     private int runXjc(List<String> args) throws Exception {
-        return Driver.run(args.toArray(new String[args.size()]), System.out, System.out);
+        return Driver.run(args.toArray(new String[0]), System.out, System.out);
     }
 
     private Javadoc getJavadocOfField(CompilationUnit compilationUnit, String fieldName) {
@@ -207,9 +207,7 @@ public class JavadocPluginTest extends Assert {
         JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
         parser.setCompilerOptions(options);
         parser.setSource(classChars);
-        CompilationUnit compilationUnit = (CompilationUnit)parser.createAST(null);
-        
-        return compilationUnit;
+        return (CompilationUnit)parser.createAST(null);
     }
 
     private FieldDeclaration findField(FieldDeclaration[] fields, String fieldName) {

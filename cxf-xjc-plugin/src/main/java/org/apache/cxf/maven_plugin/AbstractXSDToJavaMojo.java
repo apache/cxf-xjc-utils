@@ -397,7 +397,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         if (!newCp.isEmpty()) {
             Thread.currentThread()
-                .setContextClassLoader(new URLClassLoader(newCp.toArray(new URL[newCp.size()]),
+                .setContextClassLoader(new URLClassLoader(newCp.toArray(new URL[0]),
                                                           Thread.currentThread().getContextClassLoader()));
         }
         if (option.getPackagename() != null) {
@@ -429,7 +429,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             list.add(mapLocation(xsdFile).toString());
         }
 
-        return list.toArray(new String[list.size()]);
+        return list.toArray(new String[0]);
         
     }
     

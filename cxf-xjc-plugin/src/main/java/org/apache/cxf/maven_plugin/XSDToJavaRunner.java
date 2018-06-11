@@ -114,7 +114,7 @@ public class XSDToJavaRunner {
             }
         }
 
-        final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), 
+        final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), 
                                                       this.getClass().getClassLoader());
         
         CatalogManager cm = new CatalogManager();
