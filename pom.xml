@@ -46,6 +46,7 @@
     <properties>
         <cxf-buildtools-version>3.4.1</cxf-buildtools-version>
         <jdk.version>1.8</jdk.version>
+        <jaxb-version>2.2.11</jaxb-version>
 
         <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
         <downloadSources>true</downloadSources>
@@ -94,17 +95,17 @@
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
-                <version>2.2.11</version>
+                <version>${jaxb-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-xjc</artifactId>
-                <version>2.2.11</version>
+                <version>${jaxb-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-core</artifactId>
-                <version>2.2.11</version>
+                <version>${jaxb-version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -589,11 +590,14 @@
             <activation>
                 <jdk>[9,)</jdk>
             </activation>
+            <properties>
+                <jaxb-version>2.3.0</jaxb-version>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>javax.xml.bind</groupId>
                     <artifactId>jaxb-api</artifactId>
-                    <version>2.3.0</version>
+                    <version>${jaxb-version}</version>
                 </dependency>
                 <dependency>
                     <groupId>javax.annotation</groupId>

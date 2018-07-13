@@ -161,12 +161,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         if (isJava9Compatible()) {
             fork = true;
-            additionalJvmArgs = "--add-modules java.activation,java.xml.bind,java.xml.ws " 
-                    + "--add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED "
-                    + "--add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED "
+            additionalJvmArgs =  
+                     "--add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED "
                     + "--add-exports=java.xml/com.sun.org.apache.xerces.internal.impl.xs=ALL-UNNAMED "
-                    + "--add-exports=java.xml.bind/com.sun.xml.internal.bind.marshaller=ALL-UNNAMED "
-                    + "--add-opens java.xml.ws/javax.xml.ws.wsaddressing=ALL-UNNAMED "
                     + "--add-opens java.base/java.security=ALL-UNNAMED "
                     + "--add-opens java.base/java.net=ALL-UNNAMED "
                     + "--add-opens java.base/java.lang=ALL-UNNAMED "
@@ -349,12 +346,15 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     }
 
     protected boolean isJava9Compatible() {
-        String version = System.getProperty("java.version");
-        if (version.indexOf(".") > 0) {
-            version = version.substring(0, version.indexOf("."));
+        String version = System.getProperty("java.specification.version");
+        int majorVersion;
+        if (version.contains(".")) { //before jdk 9
+            majorVersion = Integer.parseInt(version.split("\\.")[1]);
+        } else {
+            majorVersion = Integer.parseInt(version);
         }
         
-        return Integer.valueOf(version) >= 9;
+        return majorVersion >= 9;
     }
     
     private int run(XsdOption option, String xsdFile, String outputDir) throws Exception {
