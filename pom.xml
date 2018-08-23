@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>20</version>
+        <version>21</version>
     </parent>
     <scm>
       <connection>scm:git:https://gitbox.apache.org/repos/asf/cxf-xjc-utils.git</connection>
