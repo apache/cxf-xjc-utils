@@ -20,17 +20,18 @@
 package org.apache.cxf.maven_plugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class XsdOption {
     String xsd;
     String xsdDir;
     String packagename;
-    String bindingFile;
     File dependencies[];
     File redundantDirs[];
     boolean extension;    
     List<String> extensionArgs;
+    List<String> bindingFiles;
     String catalog;
     
     public String getPackagename() {
@@ -52,10 +53,25 @@ public class XsdOption {
         this.xsdDir = x;
     }
     public String getBindingFile() {
-        return bindingFile;
+        if (bindingFiles != null && !bindingFiles.isEmpty()) {
+            return bindingFiles.get(0);
+        }
+        return null;
     }
     public void setBindingFile(String bf) {
-        this.bindingFile = bf;
+        if (bindingFiles == null) {
+            bindingFiles = new ArrayList<>();
+            bindingFiles.add(bf);
+        } else {
+            bindingFiles.clear();
+            bindingFiles.add(bf);
+        }
+    }
+    public List<String> getBindingFiles() {
+        return bindingFiles;
+    }
+    public void setBindingFiles(List<String> bindingFiles) {
+        this.bindingFiles = bindingFiles;
     }    
     public void setDependencies(File files[]) {
         dependencies = files;

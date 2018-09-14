@@ -214,12 +214,14 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                             //ignore
                         }
                     }
-                    if (xsdOptions[x].getBindingFile() != null) { 
-                        URI bindingURI = mapLocation(xsdOptions[x].getBindingFile());
-                        if ("file".equals(bindingURI.getScheme())) {
-                            long bts = new File(bindingURI).lastModified();
-                            if (bts > srctimestamp) {
-                                srctimestamp = bts;
+                    if (xsdOptions[x].getBindingFiles() != null) {
+                        for (String bf : xsdOptions[x].getBindingFiles()) {
+                            URI bindingURI = mapLocation(bf);
+                            if ("file".equals(bindingURI.getScheme())) {
+                                long bts = new File(bindingURI).lastModified();
+                                if (bts > srctimestamp) {
+                                    srctimestamp = bts;
+                                }
                             }
                         }
                     }
@@ -251,7 +253,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                                 }
                             }
                             removeMessages(xsdFile);
-                            removeMessages(xsdOptions[x].getBindingFile());
+                            if (xsdOptions[x].getBindingFiles() != null) {
+                                for (String bf : xsdOptions[x].getBindingFiles()) {
+                                    removeMessages(bf);
+                                }
+                            }
                             int i = run(xsdOptions[x], xsdFile, outputDir);
                             if (i == 0) {
                                 doneFile.delete();
@@ -410,9 +416,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             list.add("-p");
             list.add(option.getPackagename());
         }
-        if (option.getBindingFile() != null) {
-            list.add("-b");
-            list.add(mapLocation(option.getBindingFile()).toString());
+        if (option.getBindingFiles() != null) {
+            for (String bf : option.getBindingFiles()) {
+                list.add("-b");
+                list.add(mapLocation(bf).toString());
+            }
         }
         if (option.getCatalog() != null) {
             list.add("-catalog");
