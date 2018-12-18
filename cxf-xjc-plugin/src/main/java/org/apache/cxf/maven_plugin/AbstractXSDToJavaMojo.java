@@ -29,20 +29,17 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.jar.Manifest;
 import org.codehaus.plexus.archiver.jar.Manifest.Attribute;
@@ -50,6 +47,15 @@ import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 import org.codehaus.plexus.util.cli.StreamConsumer;
+import org.eclipse.aether.RepositoryException;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
@@ -78,13 +84,22 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
        
     @Component 
     private BuildContext buildContext;
-                
+
     @Component
     private RepositorySystem repository;
-        
-    @Component
-    private MavenSession session;
-    
+
+    /**
+     * The current repository/network configuration of Maven.
+     */
+    @Parameter(defaultValue = "${repositorySystemSession}", readonly = true)
+    private RepositorySystemSession repoSession;
+
+    /**
+     * The project's remote repositories to use for the resolution of plugins and their dependencies.
+     */
+    @Parameter(defaultValue = "${project.remotePluginRepositories}", readonly = true)
+    private List<RemoteRepository> remoteRepos;
+
     /**
      * Allows running in a separate process.
      */
@@ -115,7 +130,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
      */
     @Parameter(property = "plugin.artifacts", readonly = true, required = true)
     private List<Artifact> pluginArtifacts;    
-    
+
     abstract String getOutputDir();
     
     
@@ -311,42 +326,24 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         return xsdFiles;
     }
-    
-    private List<File> resolve(String artifactDescriptor) throws MojoExecutionException {
-        String[] s = artifactDescriptor.split(":");
 
-        String type = s.length >= 4 ? s[3] : "jar";
-        Artifact artifact = repository.createArtifact(s[0], s[1], s[2], type);
-
-        ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-        request.setArtifact(artifact);
-        
-        request.setResolveRoot(true).setResolveTransitively(true);
-        request.setServers(session.getRequest().getServers());
-        request.setMirrors(session.getRequest().getMirrors());
-        request.setProxies(session.getRequest().getProxies());
-        request.setLocalRepository(session.getLocalRepository());
-        List<ArtifactRepository> r = new ArrayList<ArtifactRepository>();
-        r.addAll(project.getPluginArtifactRepositories());
-        r.addAll(project.getRemoteArtifactRepositories());
-        r.addAll(session.getRequest().getRemoteRepositories());
-        r.addAll(session.getRequest().getPluginArtifactRepositories());
-        request.setRemoteRepositories(r);
-        ArtifactResolutionResult result = repository.resolve(request);
-        List<File> files = new ArrayList<File>();
-        for (Artifact a : result.getArtifacts()) {
-            if (a.getFile() == null) {
-                throw new MojoExecutionException("Unable to resolve " + a.toString()
+    private Set<File> resolve(String artifactDescriptor) throws MojoExecutionException, RepositoryException {
+        final Set<File> files = new HashSet<File>();
+        for (ArtifactResult artifactResult : repository
+                .resolveDependencies(repoSession,
+                        new DependencyRequest(new CollectRequest(
+                                new Dependency(new DefaultArtifact(artifactDescriptor), null), remoteRepos), null))
+                .getArtifactResults()) {
+            final org.eclipse.aether.artifact.Artifact artifact = artifactResult.getArtifact();
+            if (null == artifact || null == artifact.getFile()) {
+                throw new MojoExecutionException("Unable to resolve " + artifact.toString()
                         + " while resolving " + artifactDescriptor);
             }
-            files.add(a.getFile());
-        }
-        if (!files.contains(artifact.getFile())) {
             files.add(artifact.getFile());
         }
         return files;
     }
-    
+
     protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
         return project.getCompileClasspathElements();
     }
