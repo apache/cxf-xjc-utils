@@ -33,16 +33,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
+			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-xjc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-core</artifactId>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
