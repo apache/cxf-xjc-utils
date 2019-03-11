@@ -34,6 +34,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Description>${project.decription}</Bundle-Description>
+                        <Import-Package>
+                            javax.xml.bind*;version="[2,3)",
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
