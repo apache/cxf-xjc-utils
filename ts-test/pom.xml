@@ -22,7 +22,7 @@
     <artifactId>cxf-xjc-ts-test</artifactId>
     <packaging>jar</packaging>
     <name>Apache CXF XJC toString Plugin Tests</name>
-    <url>http://cxf.apache.org</url>
+    <url>https://cxf.apache.org</url>
 
     <parent>
         <groupId>org.apache.cxf.xjc-utils</groupId>

@@ -22,7 +22,7 @@
     <artifactId>cxf-xjc-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <name>Apache CXF XSD2Java Plugin</name>
-    <url>http://cxf.apache.org</url>
+    <url>https://cxf.apache.org</url>
 
     <parent>
         <groupId>org.apache.cxf.xjc-utils</groupId>

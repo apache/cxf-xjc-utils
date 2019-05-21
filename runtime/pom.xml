@@ -10,7 +10,7 @@
     <artifactId>cxf-xjc-runtime</artifactId>
     <packaging>bundle</packaging>
     <name>Apache CXF XJC Runtime</name>
-    <url>http://cxf.apache.org</url>
+    <url>https://cxf.apache.org</url>
 
     <parent>
         <groupId>org.apache.cxf.xjc-utils</groupId>
