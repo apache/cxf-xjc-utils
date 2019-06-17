@@ -432,8 +432,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         if (getLog().isDebugEnabled()) {
             list.add("-verbose");            
         }
-        list.add("-encoding");
-        list.add(encoding);
+        if (encoding != null) {
+            list.add("-encoding");
+            list.add(encoding);
+        }
         
         String[] xsdFiles = getXsdFiles(option.getXsdDir(), option.getXsd());
         for (String xsdFile : xsdFiles) {
