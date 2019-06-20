@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -500,7 +501,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         File file = null;
         try {
             //file = new File("Y:\\Users\\dkulp\\tmp\\test.jar");
-            file = File.createTempFile("cxf-xjc-plugin", ".jar");
+            file = Files.createTempFile("cxf-xjc-plugin", ".jar").toFile();
             file.deleteOnExit();
             
             JarArchiver jar = new JarArchiver();
