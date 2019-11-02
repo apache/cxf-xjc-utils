@@ -27,9 +27,9 @@ public class XsdOption {
     String xsd;
     String xsdDir;
     String packagename;
-    File dependencies[];
-    File redundantDirs[];
-    boolean extension;    
+    File[] dependencies;
+    File[] redundantDirs;
+    boolean extension;
     List<String> extensionArgs;
     List<String> bindingFiles;
     String catalog;
@@ -73,14 +73,14 @@ public class XsdOption {
     public void setBindingFiles(List<String> bindingFiles) {
         this.bindingFiles = bindingFiles;
     }    
-    public void setDependencies(File files[]) {
+    public void setDependencies(File[] files) {
         dependencies = files;
     }
     public File[] getDependencies() {
         return dependencies;
     }
 
-    public void setDeleteDirs(File files[]) {
+    public void setDeleteDirs(File[] files) {
         redundantDirs = files;
     }
     public File[] getDeleteDirs() {

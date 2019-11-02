@@ -62,12 +62,12 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 /**
  * CXF XSD To Java Tool
  */
-public abstract class AbstractXSDToJavaMojo extends AbstractMojo {   
+public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     @Component
     protected MavenProject project;
     
     @Parameter
-    XsdOption xsdOptions[];
+    XsdOption[] xsdOptions;
     
     /**
      * Directory in which the "DONE" markers are saved that 
@@ -248,10 +248,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     } else if (srctimestamp > doneFile.lastModified()) {
                         doWork = true;
                     } else {
-                        File files[] = xsdOptions[x].getDependencies();
+                        File[] files = xsdOptions[x].getDependencies();
                         if (files != null) {
-                            for (int z = 0; z < files.length; ++z) {
-                                if (files[z].lastModified() > doneFile.lastModified()) {
+                            for (File file : files) {
+                                if (file.lastModified() > doneFile.lastModified()) {
                                     doWork = true;
                                 }
                             }
@@ -260,11 +260,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
 
                     if (doWork) {
                         try {
-                            File files[] = xsdOptions[x].getDependencies();
+                            File[] files = xsdOptions[x].getDependencies();
                             if (files != null) {
-                                for (int z = 0; z < files.length; ++z) {
-                                    if (files[z].lastModified() > doneFile.lastModified()) {
-                                        buildContext.removeMessages(files[z]);
+                                for (File file : files) {
+                                    if (file.lastModified() > doneFile.lastModified()) {
+                                        buildContext.removeMessages(file);
                                     }
                                 }
                             }
@@ -279,10 +279,10 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                                 doneFile.delete();
                                 doneFile.createNewFile();
                             }
-                            File dirs[] = xsdOptions[x].getDeleteDirs();
+                            File[] dirs = xsdOptions[x].getDeleteDirs();
                             if (dirs != null) {
-                                for (int idx = 0; idx < dirs.length; ++idx) {
-                                    result = result && deleteDir(dirs[idx]);
+                                for (File dir : dirs) {
+                                    result = result && deleteDir(dir);
                                 }
                             }
                             buildContext.refresh(outputDirFile);
@@ -451,9 +451,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     private boolean deleteDir(File f) {
         if (f.isDirectory()) {
-            File files[] = f.listFiles();
-            for (int idx = 0; idx < files.length; ++idx) {
-                deleteDir(files[idx]);
+            File[] files = f.listFiles();
+            for (File file : files) {
+                deleteDir(file);
             }
         }
         
