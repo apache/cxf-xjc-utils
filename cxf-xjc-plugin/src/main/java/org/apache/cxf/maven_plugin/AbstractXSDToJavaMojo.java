@@ -392,7 +392,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         
         List<URL> newCp = new ArrayList<URL>();
         List<String> list = new ArrayList<String>();
-        if (extensions != null && extensions.size() > 0) {
+        if (extensions != null && !extensions.isEmpty()) {
             try {
                 for (String ext : extensions) {
                     for (File file : resolve(ext)) {

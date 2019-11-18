@@ -343,24 +343,24 @@ public class DefaultValuePlugin {
             dv = JExpr.direct(Boolean.valueOf(defaultValue) ? "Boolean.TRUE" : "Boolean.FALSE");
         } else if ("java.lang.Byte".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                .arg(JExpr.cast(type.unboxify(), 
-                    JExpr.lit(new Byte(Short.valueOf(defaultValue).byteValue()))));
+                .arg(JExpr.cast(type.unboxify(),
+                    JExpr.lit(Byte.parseByte(defaultValue))));
         } else if ("java.lang.Double".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                .arg(JExpr.lit(new Double(Double.valueOf(defaultValue).doubleValue())));
+                .arg(JExpr.lit(Double.parseDouble(defaultValue)));
         } else if ("java.lang.Float".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                     .arg(JExpr.lit(new Float(Float.valueOf(defaultValue).floatValue())));
+                 .arg(JExpr.lit(Float.parseFloat(defaultValue)));
         } else if ("java.lang.Integer".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                .arg(JExpr.lit(new Integer(Integer.valueOf(defaultValue).intValue())));
+                .arg(JExpr.lit(Integer.parseInt(defaultValue)));
         } else if ("java.lang.Long".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                .arg(JExpr.lit(new Long(Long.valueOf(defaultValue).longValue())));
+                .arg(JExpr.lit(Long.parseLong(defaultValue)));
         } else if ("java.lang.Short".equals(typeName) && isElement) {
             dv = JExpr._new(type)
-                .arg(JExpr.cast(type.unboxify(), 
-                    JExpr.lit(new Short(Short.valueOf(defaultValue).shortValue()))));
+                .arg(JExpr.cast(type.unboxify(),
+                    JExpr.lit(Short.parseShort(defaultValue))));
         } else if ("java.lang.String".equals(type.fullName()) && isElement) {
             dv = JExpr.lit(defaultValue);
         } else if ("java.math.BigInteger".equals(type.fullName()) && isElement) {
@@ -395,19 +395,19 @@ public class DefaultValuePlugin {
         } else if (unbox) {
             typeName = type.unboxify().fullName();
             if ("int".equals(typeName)) {
-                dv = JExpr.lit(Integer.valueOf(defaultValue).intValue());
+                dv = JExpr.lit(Integer.parseInt(defaultValue));
             } else if ("long".equals(typeName)) {
-                dv = JExpr.lit(Long.valueOf(defaultValue).longValue());
+                dv = JExpr.lit(Long.parseLong(defaultValue));
             } else if ("short".equals(typeName)) {
-                dv = JExpr.lit(Short.valueOf(defaultValue).shortValue());
+                dv = JExpr.lit(Short.parseShort(defaultValue));
             } else if ("boolean".equals(typeName)) {
-                dv = JExpr.lit(Boolean.valueOf(defaultValue).booleanValue());
+                dv = JExpr.lit(Boolean.parseBoolean(defaultValue));
             } else if ("double".equals(typeName)) {
-                dv = JExpr.lit(Double.valueOf(defaultValue).doubleValue());
+                dv = JExpr.lit(Double.parseDouble(defaultValue));
             } else if ("float".equals(typeName)) {
-                dv = JExpr.lit(Float.valueOf(defaultValue).floatValue());
+                dv = JExpr.lit(Float.parseFloat(defaultValue));
             } else if ("byte".equals(typeName)) {
-                dv = JExpr.lit(Byte.valueOf(defaultValue).byteValue());
+                dv = JExpr.lit(Byte.parseByte(defaultValue));
             } else {
                 dv = getDefaultValueExpression(f,
                                                co,

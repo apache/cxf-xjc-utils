@@ -30,38 +30,38 @@ import org.junit.Test;
 
 public class JAXBToStringBuilderTest {
 
-    final String dataV = "someData";    
+    private static final String DATA = "someData";
 
     @Test
     public void testToString() throws Exception {    
-        String res = JAXBToStringBuilder.valueOf(dataV);
-        Assert.assertEquals(res, dataV);
+        String res = JAXBToStringBuilder.valueOf(DATA);
+        Assert.assertEquals(res, DATA);
     }
 
     @Test
     public void testToStringArray() throws Exception {  
-        String[] data = new String[]{dataV};
+        String[] data = new String[]{DATA};
         String res = JAXBToStringBuilder.valueOf(data);
-        Assert.assertTrue(res.indexOf(dataV) != -1);
+        Assert.assertTrue(res.indexOf(DATA) != -1);
     }
 
     @Test
     public void testToStringCollection() throws Exception {  
         List<String> data = new ArrayList<String>();
-        data.add(dataV);
+        data.add(DATA);
         String res = JAXBToStringBuilder.valueOf(data);
-        Assert.assertTrue(res.indexOf(dataV) != -1);
+        Assert.assertTrue(res.indexOf(DATA) != -1);
     }
 
     
     @Test
     public void testToStringMap() throws Exception {  
         Map<String, String> data = new HashMap<String, String>();
-        data.put(dataV, dataV);
+        data.put(DATA, DATA);
         
         // no content as it is not a Collection
         String res = JAXBToStringBuilder.valueOf(data);
-        Assert.assertTrue(res.indexOf(dataV) == -1);
+        Assert.assertTrue(res.indexOf(DATA) == -1);
     }
 
 }

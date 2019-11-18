@@ -181,11 +181,11 @@ public class DefaultValueTest extends Assert {
         assertEquals("Unexpected value for element integerElem",
                      new BigInteger("11"), foo.getIntegerElem());
         assertEquals("Unexpected value for element intElem",
-                     new Integer(12), foo.getIntElem());
+                     12, foo.getIntElem().intValue());
         assertEquals("Unexpected value for element longElem",
-                     new Long(13L), foo.getLongElem());
+                     13L, foo.getLongElem().longValue());
         assertEquals("Unexpected value for element shortElem",
-                     new Short((short)14), foo.getShortElem());
+                     (short)14, foo.getShortElem().shortValue());
         assertEquals("Unexpected value for element decimalElem",
                      new BigDecimal("15"), foo.getDecimalElem());
         assertEquals("Unexpected value for element floatElem",
@@ -193,7 +193,7 @@ public class DefaultValueTest extends Assert {
         assertEquals("Unexpected value for element doubleElem",
                      new Double(17D), foo.getDoubleElem());
         assertEquals("Unexpected value for element byteElem",
-                     new Byte((byte)18), foo.getByteElem());
+                     (byte)18, foo.getByteElem().byteValue());
         
         byte[] expected = DatatypeConverter.parseBase64Binary("abcdefgh");
         byte[] effective = foo.getBase64BinaryElem();
@@ -217,11 +217,11 @@ public class DefaultValueTest extends Assert {
                      "string", qn.getLocalPart());
        
         assertEquals("Unexpected value for element unsignedIntElem",
-                     new Long(19L), foo.getUnsignedIntElem());
+                     19L, foo.getUnsignedIntElem().longValue());
         assertEquals("Unexpected value for element unsignedShortElem",
-                     new Integer(20), foo.getUnsignedShortElem());
+                     20, foo.getUnsignedShortElem().intValue());
         assertEquals("Unexpected value for element unsignedByteElem",
-                     new Short((short)21), foo.getUnsignedByteElem());
+                     (short)21, foo.getUnsignedByteElem().shortValue());
 
         assertEquals("Unexpected value for element durationElem",
                      0, foo.getDurationElem().getSeconds());
