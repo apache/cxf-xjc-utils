@@ -36,7 +36,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.apache.cxf.configuration.foo.Foo;
-import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,8 +47,6 @@ public class DefaultValueTest extends Assert {
     @Test
     public void testFooDefaultValues() throws Exception {
 
-        DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
-        
         Foo foo = new org.apache.cxf.configuration.foo.ObjectFactory().createFoo();
 
         // verify default values
@@ -82,9 +79,9 @@ public class DefaultValueTest extends Assert {
         assertEquals("Unexpected value for attribute decimalAttr",
                      new BigDecimal("115"), foo.getDecimalAttr());
         assertEquals("Unexpected value for attribute floatAttr",
-                     new Float(116F), new Float(foo.getFloatAttr()));
+                     116F, foo.getFloatAttr(), 0F);
         assertEquals("Unexpected value for attribute doubleAttr",
-                     new Double(117D), new Double(foo.getDoubleAttr()));
+                     117D, foo.getDoubleAttr(), 0D);
         assertEquals("Unexpected value for attribute byteAttr",
                      118, foo.getByteAttr());
         
@@ -189,9 +186,9 @@ public class DefaultValueTest extends Assert {
         assertEquals("Unexpected value for element decimalElem",
                      new BigDecimal("15"), foo.getDecimalElem());
         assertEquals("Unexpected value for element floatElem",
-                     new Float(16F), foo.getFloatElem());
+                     16F, foo.getFloatElem(), 0F);
         assertEquals("Unexpected value for element doubleElem",
-                     new Double(17D), foo.getDoubleElem());
+                     17D, foo.getDoubleElem(), 0D);
         assertEquals("Unexpected value for element byteElem",
                      (byte)18, foo.getByteElem().byteValue());
         

@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://cxf.apache.org/configuration/foo" targetNamespace="http://cxf.apache.org/configuration/foo" elementFormDefault="qualified">
+<xs:schema attributeFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://cxf.apache.org/configuration/foo" targetNamespace="http://cxf.apache.org/configuration/foo" elementFormDefault="qualified">
 
     <xs:element name="foo" type="tns:foo"/>
     

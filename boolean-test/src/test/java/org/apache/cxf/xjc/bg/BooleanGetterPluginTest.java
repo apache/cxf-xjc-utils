@@ -18,10 +18,7 @@
  */
 package org.apache.cxf.xjc.bg;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.cxf.configuration.foo.Foo;
-import org.apache.ws.jaxme.impl.DatatypeConverterImpl;
 
 import org.junit.Test;
 
@@ -29,8 +26,6 @@ public class BooleanGetterPluginTest {
 
     @Test
     public void testBooleanGetter() throws Exception {
-
-        DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
 
         Foo foo = new org.apache.cxf.configuration.foo.ObjectFactory().createFoo();
 
