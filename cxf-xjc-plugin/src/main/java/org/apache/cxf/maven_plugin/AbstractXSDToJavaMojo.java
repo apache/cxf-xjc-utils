@@ -337,7 +337,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 .getArtifactResults()) {
             final org.eclipse.aether.artifact.Artifact artifact = artifactResult.getArtifact();
             if (null == artifact || null == artifact.getFile()) {
-                throw new MojoExecutionException("Unable to resolve " + artifact.toString()
+                throw new MojoExecutionException("Unable to resolve " + artifact
                         + " while resolving " + artifactDescriptor);
             }
             files.add(artifact.getFile());
@@ -471,7 +471,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             throw new IOException(
                                   "The java executable '"
                                       + javaExe
-                                      + "' doesn't exist or is not a file." 
+                                      + "' doesn't exist or is not a file. " 
                                       + "Verify the <javaExecutable/> parameter.");
         }
         return javaExe;
