@@ -19,7 +19,6 @@
 
 package org.apache.cxf.maven_plugin;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +102,7 @@ public class XSDToJavaRunner {
                 urls.add(file.toURI().toURL());
             }
         }
-        for (int x = 0; x < args.length; x++) {
+        for (int x = 0; x < args.length - 1; x++) {
             if ("-classpath".equals(args[x])) {
                 File file = getFile(args[x + 1], listener);
                 if (file != null && file.exists()) {
@@ -114,101 +113,87 @@ public class XSDToJavaRunner {
             }
         }
 
-        final ClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), 
-                                                      this.getClass().getClassLoader());
-        
-        CatalogManager cm = new CatalogManager();
-        cm.setUseStaticCatalog(false);
-        cm.setIgnoreMissingProperties(true);
-        final CatalogResolver catResolver = new CatalogResolver(cm) {
-            public InputSource resolveEntity(String publicId, String systemId) {
-                String resolved = getResolvedEntity(publicId, systemId);
-                if (resolved == null) {
-                    return null;
-                }
-                URL url;
-                InputSource iSource = new InputSource(resolved);
-                iSource.setPublicId(publicId);
-                try {
-                    if (resolved.startsWith("classpath:")) {
-                        resolved = resolved.substring("classpath:".length());
-                        url = loader.getResource(resolved);
-                        iSource.setSystemId(url.toExternalForm());
-                    } else {
-                        url = new URL(resolved);
+        try (URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]),
+                                                      this.getClass().getClassLoader())) {
+            final CatalogManager cm = new CatalogManager();
+            cm.setUseStaticCatalog(false);
+            cm.setIgnoreMissingProperties(true);
+            final CatalogResolver catResolver = new CatalogResolver(cm) {
+                public InputSource resolveEntity(String publicId, String systemId) {
+                    final String resolved = getResolvedEntity(publicId, systemId);
+                    if (resolved == null) {
+                        return null;
                     }
-                    InputStream iStream = url.openStream();
-                    iSource.setByteStream(iStream);
+                    InputSource iSource = new InputSource(resolved);
+                    iSource.setPublicId(publicId);
+                    try {
+                        final URL url;
+                        if (resolved.startsWith("classpath:")) {
+                            url = loader.getResource(resolved.substring("classpath:".length()));
+                            iSource.setSystemId(url.toExternalForm());
+                        } else {
+                            url = new URL(resolved);
+                        }
+                        InputStream iStream = url.openStream();
+                        iSource.setByteStream(iStream);
 
-                    //System.out.println("Resolved: " + publicId + " " + systemId + " " + url);
-                    return iSource;
-                } catch (Exception e) {
-                    listener.warning(xsdFile, e);
-                    return null;
+                        //System.out.println("Resolved: " + publicId + " " + systemId + " " + url);
+                        return iSource;
+                    } catch (Exception e) {
+                        listener.warning(xsdFile, e);
+                        return null;
+                    }
                 }
-            }
-        };
-        final Options opt = new Options() {
-            @Override
-            public void addCatalog(File catalogFile) throws IOException {
-                if (entityResolver == null) {
-                    entityResolver = catResolver;
+            };
+            final Options opt = new Options() {
+                @Override
+                public void addCatalog(File catalogFile) throws IOException {
+                    if (entityResolver == null) {
+                        entityResolver = catResolver;
+                    }
+                    catResolver.getCatalog().parseCatalog(catalogFile.getPath());
                 }
-                catResolver.getCatalog().parseCatalog(catalogFile.getPath());
-            }
-        };
+            };
 
-        for (URL url : urls) {
-            opt.classpaths.add(url);
-        }
-        if (checkXmlElementRef()) {
-            opt.target = SpecVersion.V2_1;
-        }
-        opt.setSchemaLanguage(Language.XMLSCHEMA);
-        // set up the context class loader so that the user-specified plugin
-        // on classpath can be loaded from there with jaxb-xjc 2.3.0
-        ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(opt.getUserClassLoader(origLoader));
-            opt.parseArguments(args);
-        } finally {
-            Thread.currentThread().setContextClassLoader(origLoader);
-        }
-        Model model = loadModel(opt); 
-        if (model == null) {
-            listener.message(xsdFile, "Failed to create model");
-            if (loader instanceof Closeable) {
-                ((Closeable)loader).close();
+            for (URL url : urls) {
+                opt.classpaths.add(url);
             }
-            return -1;
-        }
-        Outline outline = model.generateCode(opt, listener);
-        if (outline == null) {
-            listener.message(xsdFile, "Failed to generate code");
-            if (loader instanceof Closeable) {
-                ((Closeable)loader).close();
+            if (checkXmlElementRef()) {
+                opt.target = SpecVersion.V2_1;
             }
-            return -1;
-        }
+            opt.setSchemaLanguage(Language.XMLSCHEMA);
+            // set up the context class loader so that the user-specified plugin
+            // on classpath can be loaded from there with jaxb-xjc 2.3.0
+            ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(opt.getUserClassLoader(origLoader));
+                opt.parseArguments(args);
+            } finally {
+                Thread.currentThread().setContextClassLoader(origLoader);
+            }
+            Model model = loadModel(opt); 
+            if (model == null) {
+                listener.message(xsdFile, "Failed to create model");
+                return -1;
+            }
+            Outline outline = model.generateCode(opt, listener);
+            if (outline == null) {
+                listener.message(xsdFile, "Failed to generate code");
+                return -1;
+            }
 
-        // then print them out
-        try {
-            CodeWriter cw = opt.createCodeWriter();
-            model.codeModel.build(cw);
-        } catch (IOException e) {
-            listener.error(e);
-            if (loader instanceof Closeable) {
-                ((Closeable)loader).close();
+            // then print them out
+            try {
+                CodeWriter cw = opt.createCodeWriter();
+                model.codeModel.build(cw);
+            } catch (IOException e) {
+                listener.error(e);
+                return -1;
             }
-            return -1;
         }
-        if (loader instanceof Closeable) {
-            ((Closeable)loader).close();
-        }
-        return 0;        
+        return 0;
     }
-    
-    
+
     private synchronized Class<?> getModelLoaderClass() {
         if (modelLoaderClass == null) {
             try {
