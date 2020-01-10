@@ -44,7 +44,7 @@
     </prerequisites>
 
     <properties>
-        <cxf-buildtools-version>3.4.4</cxf-buildtools-version>
+        <cxf-buildtools-version>3.4.5-SNAPSHOT</cxf-buildtools-version>
         <jdk.version>1.8</jdk.version>
         <jaxb-version>2.3.2</jaxb-version>
 
