@@ -496,11 +496,9 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             throw new MojoExecutionException(e.getMessage(), e);
         }
         cmd.createArg().setLine(additionalJvmArgs);
-        
-        
-        File file = null;
+
+        final File file;
         try {
-            //file = new File("Y:\\Users\\dkulp\\tmp\\test.jar");
             file = Files.createTempFile("cxf-xjc-plugin", ".jar").toFile();
             file.deleteOnExit();
             

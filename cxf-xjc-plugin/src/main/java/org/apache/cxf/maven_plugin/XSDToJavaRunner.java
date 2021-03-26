@@ -201,7 +201,7 @@ public class XSDToJavaRunner {
                 CtClass cc = pool.get("com.sun.tools.xjc.ModelLoader");
                 cc.setName("com.sun.tools.xjc.ModelLoader");
                 for (CtMethod m : cc.getMethods()) {
-                    if (m.getName().equals("buildDOMForest")) {
+                    if ("buildDOMForest".equals(m.getName())) {
                         m.insertBefore("$1 = new " + CustomizedLogic.class.getName() + "();");
                     }
                 }

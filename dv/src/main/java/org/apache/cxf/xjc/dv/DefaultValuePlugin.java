@@ -179,18 +179,17 @@ public class DefaultValuePlugin {
                 if (f.getPropertyInfo().getSchemaComponent() instanceof XSParticle) {
                     particle = (XSParticle)f.getPropertyInfo().getSchemaComponent();
                     XSTerm term = particle.getTerm();
-                    XSElementDecl element = null;
 
                     if (term.isElementDecl()) {
-                        element = particle.getTerm().asElementDecl();
-                        xmlDefaultValue = element.getDefaultValue();                        
+                        XSElementDecl element = particle.getTerm().asElementDecl();
+                        xmlDefaultValue = element.getDefaultValue();
                         xsType = element.getType();
                         isElement = true;
                     }
                 } else if (f.getPropertyInfo().getSchemaComponent() instanceof XSAttributeUse) {
                     XSAttributeUse attributeUse = (XSAttributeUse)f.getPropertyInfo().getSchemaComponent();
                     XSAttributeDecl decl = attributeUse.getDecl();
-                    xmlDefaultValue = decl.getDefaultValue();                        
+                    xmlDefaultValue = decl.getDefaultValue();
                     xsType = decl.getType();
                     isRequiredAttr = attributeUse.isRequired();
                 }
@@ -268,7 +267,7 @@ public class DefaultValuePlugin {
                             List<JExpression> args = (List<JExpression>)f.get(ji);
                             
                             JExpression cast = args.get(args.size() - 1);
-                            if (cast.getClass().getSimpleName().equals("JCast")) {
+                            if ("JCast".equals(cast.getClass().getSimpleName())) {
                                 f = cast.getClass().getDeclaredField("object");
                                 f.setAccessible(true);
                                 JExpression exp = (JExpression)f.get(cast);

@@ -19,8 +19,6 @@
 
 package org.apache.cxf.xjc.wsdlextension;
 
-import java.lang.reflect.Type;
-
 import org.apache.cxf.configuration.foo.Foo;
 
 import org.junit.Assert;
@@ -33,16 +31,7 @@ public class WSDLExtensionTest extends Assert {
 
         Foo foo = new org.apache.cxf.configuration.foo.ObjectFactory().createFoo();
 
-        Type[] interfaces = foo.getClass().getGenericInterfaces();
-        boolean extensibilityElementExist = false;
-        for (int i = 0; i < interfaces.length; i++) {
-            Type inter = interfaces[i];
-            if (inter.toString().equals("interface javax.wsdl.extensions.ExtensibilityElement")) {
-                extensibilityElementExist = true;
-                break;
-            }
-        }
-
-        assertTrue("The interface ExtensibilityElement should be used.", extensibilityElementExist);
+        assertTrue("The interface ExtensibilityElement should be used.",
+            foo instanceof javax.wsdl.extensions.ExtensibilityElement);
     }
 }

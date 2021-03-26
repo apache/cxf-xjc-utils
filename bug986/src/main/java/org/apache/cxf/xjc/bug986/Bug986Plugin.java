@@ -81,7 +81,7 @@ public class Bug986Plugin {
                         JAnnotationValue st = getAnnotationMember(j, "name");
                         StringWriter sw = new StringWriter();
                         st.generate(new JFormatter(sw));
-                        if (sw.toString().equals("\"anySimpleType\"")) {
+                        if ("\"anySimpleType\"".equals(sw.toString())) {
                             if (field.type().fullName().startsWith("java.util.List")) {
                                 //if it's a list of non-string types, we have to remove
                                 if (!field.type().fullName().contains("<java.lang.String>")) {

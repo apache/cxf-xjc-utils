@@ -93,7 +93,6 @@ public class PropertyListenerPlugin {
                     m.body().pos(0);
                     List<Object> contents = m.body().getContents();
                     JFieldRef target = null;
-                    String targetName = null;
                     JExpression value = null;
                     for (Object o : contents) {
                         if (o instanceof JAssignment) {
@@ -115,7 +114,7 @@ public class PropertyListenerPlugin {
                     }
                     if (target != null) {
                         try {
-                            targetName = getName(target);
+                            String targetName = getName(target);
                             
                             JFieldVar field = co.implClass.fields().get(targetName);
                             

@@ -57,7 +57,7 @@ public class WSDLExtension {
     public int parseArgument(Options opt, String[] args, int index) throws BadCommandLineException,
         IOException {
         int ret = 0;
-        if (args[index].equals("-Xwsdlextension")) {
+        if ("-Xwsdlextension".equals(args[index])) {
             ret = 1;
         }
         return ret;
