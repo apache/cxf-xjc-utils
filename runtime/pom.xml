@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.apache.cxf.xjc-utils</groupId>
         <artifactId>xjc-utils</artifactId>
-        <version>3.3.2-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -30,7 +30,7 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Description>${project.decription}</Bundle-Description>
                         <Import-Package>
-                            javax.xml.bind*;version="[2,3)",
+                            jakarta.xml.bind*;version="[3,4)",
                             *
                         </Import-Package>
                     </instructions>

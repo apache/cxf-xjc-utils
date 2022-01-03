@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.xml.bind.annotation.XmlSchemaType;
 
 import org.xml.sax.ErrorHandler;
 
@@ -43,6 +42,8 @@ import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+
+import jakarta.xml.bind.annotation.XmlSchemaType;
 
 /**
  * Modifies the JAXB code model to handle package naming that run into:

@@ -19,10 +19,10 @@
 
 package org.apache.cxf.xjc.runtime;
 
-import javax.xml.bind.JAXBElement;
-
+import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
 
 /*
  * Override default styles to recognise JAXBElement as needing introspection

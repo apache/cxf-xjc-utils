@@ -29,7 +29,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElementRef;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -51,6 +50,7 @@ import com.sun.tools.xjc.reader.internalizer.AbstractReferenceFinderImpl;
 import com.sun.tools.xjc.reader.internalizer.DOMForest;
 import com.sun.tools.xjc.reader.xmlschema.parser.XMLSchemaInternalizationLogic;
 
+import jakarta.xml.bind.annotation.XmlElementRef;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -159,7 +159,7 @@ public class XSDToJavaRunner {
                 opt.classpaths.add(url);
             }
             if (checkXmlElementRef()) {
-                opt.target = SpecVersion.V2_1;
+                opt.target = SpecVersion.V2_3;
             }
             opt.setSchemaLanguage(Language.XMLSCHEMA);
             // set up the context class loader so that the user-specified plugin

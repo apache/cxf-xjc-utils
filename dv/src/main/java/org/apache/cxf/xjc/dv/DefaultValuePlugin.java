@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.namespace.NamespaceContext;
@@ -63,6 +61,9 @@ import com.sun.xml.xsom.XSParticle;
 import com.sun.xml.xsom.XSTerm;
 import com.sun.xml.xsom.XSType;
 import com.sun.xml.xsom.XmlString;
+
+import jakarta.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Modifies the JAXB code model to initialize fields mapped from schema elements 
@@ -202,7 +203,7 @@ public class DefaultValuePlugin {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     if (var != null 
-                        && !"javax.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
+                        && !"jakarta.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
                         var.init(JExpr._new(f.getRawType()));
                     }
                 }
@@ -230,14 +231,14 @@ public class DefaultValuePlugin {
                     } else {
                         JType type = f.getRawType();
                         String typeName = type.fullName();
-                        if ("javax.xml.datatype.Duration".equals(typeName)) {
+                        if ("jakarta.xml.datatype.Duration".equals(typeName)) {
                             updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
                         }
                     }
                 } else if (null == dvExpr) {                    
                     JType type = f.getRawType();
                     String typeName = type.fullName();
-                    if ("javax.xml.datatype.Duration".equals(typeName)) {
+                    if ("jakarta.xml.datatype.Duration".equals(typeName)) {
                         updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
                     }
                 } else {
@@ -251,8 +252,8 @@ public class DefaultValuePlugin {
             JDefinedClass cls = po.objectFactoryGenerator().getObjectFactory();
             for (JMethod m : cls.methods()) {
                 String tn = m.type().fullName();
-                if (tn.startsWith("javax.xml.bind.JAXBElement<java.util.List<") 
-                    || tn.startsWith("javax.xml.bind.JAXBElement<byte[]>")) {
+                if (tn.startsWith("jakarta.xml.bind.JAXBElement<java.util.List<") 
+                    || tn.startsWith("jakarta.xml.bind.JAXBElement<byte[]>")) {
                     JBlock b = m.body();
                     
                     for (Object o : b.getContents()) {
