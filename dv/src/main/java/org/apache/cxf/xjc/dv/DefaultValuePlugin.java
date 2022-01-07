@@ -231,14 +231,14 @@ public class DefaultValuePlugin {
                     } else {
                         JType type = f.getRawType();
                         String typeName = type.fullName();
-                        if ("jakarta.xml.datatype.Duration".equals(typeName)) {
+                        if ("javax.xml.datatype.Duration".equals(typeName)) {
                             updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
                         }
                     }
                 } else if (null == dvExpr) {                    
                     JType type = f.getRawType();
                     String typeName = type.fullName();
-                    if ("jakarta.xml.datatype.Duration".equals(typeName)) {
+                    if ("javax.xml.datatype.Duration".equals(typeName)) {
                         updateDurationGetter(co, f, co.implClass, xmlDefaultValue, outline);
                     }
                 } else {
