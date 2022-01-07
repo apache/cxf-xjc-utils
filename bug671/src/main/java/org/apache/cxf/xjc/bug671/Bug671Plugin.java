@@ -19,12 +19,12 @@
 
 package org.apache.cxf.xjc.bug671;
 
-
 import com.sun.codemodel.JJavaName;
 import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
-import com.sun.xml.bind.api.impl.NameConverter;
+
+import org.glassfish.jaxb.core.api.impl.NameConverter;
 
 /**
  * Modifies the JAXB code model to handle package naming that run into:

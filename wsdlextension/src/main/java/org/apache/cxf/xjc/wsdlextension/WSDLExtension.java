@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.wsdl.extensions.ExtensibilityElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.namespace.QName;
 
 import org.xml.sax.ErrorHandler;
@@ -40,6 +38,9 @@ import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 public class WSDLExtension {
 

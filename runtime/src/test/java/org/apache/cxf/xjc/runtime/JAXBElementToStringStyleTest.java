@@ -20,9 +20,9 @@
 package org.apache.cxf.xjc.runtime;
 
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import org.junit.Assert;

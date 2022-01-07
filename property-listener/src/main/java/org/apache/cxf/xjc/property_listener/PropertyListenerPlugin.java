@@ -26,7 +26,6 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.xml.sax.ErrorHandler;
 
@@ -41,6 +40,8 @@ import com.sun.codemodel.JVar;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * Modifies the JAXB code model to add a PropertyChangeListener to the 
