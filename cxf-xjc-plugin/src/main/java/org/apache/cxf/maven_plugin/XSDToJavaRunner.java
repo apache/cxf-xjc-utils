@@ -124,7 +124,7 @@ public class XSDToJavaRunner {
                     if (resolved == null) {
                         return null;
                     }
-                    InputSource iSource = new InputSource(resolved);
+                    InputSource iSource = new InputSource((systemId != null) ? systemId : resolved);
                     iSource.setPublicId(publicId);
                     try {
                         final URL url;
