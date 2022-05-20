@@ -44,7 +44,7 @@
     </prerequisites>
 
     <properties>
-        <cxf-buildtools-version>3.4.5-SNAPSHOT</cxf-buildtools-version>
+        <cxf-buildtools-version>4.0.0-SNAPSHOT</cxf-buildtools-version>
         <jdk.version>1.8</jdk.version>
         <jaxb-version>3.0.1</jaxb-version>
         <jaxb-runtime-version>3.0.2</jaxb-runtime-version>
@@ -361,7 +361,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.41</version>
+                            <version>10.1</version>
                         </dependency>
                     </dependencies>
                     <configuration>
