@@ -45,7 +45,7 @@
 
     <properties>
         <cxf-buildtools-version>4.0.0-SNAPSHOT</cxf-buildtools-version>
-        <jdk.version>1.8</jdk.version>
+        <jdk.version>11</jdk.version>
         <jaxb-version>3.0.1</jaxb-version>
         <jaxb-runtime-version>3.0.2</jaxb-runtime-version>
 
@@ -420,6 +420,21 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <configuration>
+                        <rules>
+                            <requireJavaVersion>
+                                <version>11</version>
+                            </requireJavaVersion>
+                            <requireMavenVersion>
+                                <version>3.5</version>
+                            </requireMavenVersion>
+                        </rules>
+                    </configuration>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
