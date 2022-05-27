@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>23</version>
+        <version>24</version>
     </parent>
     <scm>
       <connection>scm:git:https://gitbox.apache.org/repos/asf/cxf-xjc-utils.git</connection>
@@ -55,6 +55,7 @@
         <pmd.eclipse.ruleset>cxf-pmd-ruleset.xml</pmd.eclipse.ruleset>
         <resources.base.path />
         <checkstyle.extension />
+        <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
     </properties>
 
     <modules>
