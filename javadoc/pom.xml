@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.eclipse.equinox</groupId>
 			<artifactId>app</artifactId>
-			<version>1.3.100-v20130327-1442</version>
+			<version>1.3.200-v20130910-1609</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
