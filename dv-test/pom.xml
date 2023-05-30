@@ -62,25 +62,47 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
+                        <id>foo</id>
                         <goals>
                             <goal>xsdtojava-tests</goal>
                         </goals>
+                        <configuration>
+                            <xsdOptions>
+                                <xsdOption>
+                                    <extension>true</extension>
+                                    <xsd>${basedir}/src/test/resources/schemas/configuration/foo.xsd</xsd>
+                                    <extensionArgs>
+                                        <arg>-Xdv</arg>
+                                    </extensionArgs>
+                                </xsdOption>
+                            </xsdOptions>
+                            <extensions>
+                                <extension>org.apache.cxf.xjcplugins:cxf-xjc-dv:${project.version}</extension>
+                            </extensions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>foo-simple</id>
+                        <goals>
+                            <goal>xsdtojava-tests</goal>
+                        </goals>
+                        <configuration>
+                            <xsdOptions>
+                                <xsdOption>
+                                    <extension>true</extension>
+                                    <xsd>${basedir}/src/test/resources/schemas/configuration/foo-simple.xsd</xsd>
+                                    <bindingFile>${basedir}/src/test/resources/foo-simple.xjb</bindingFile>
+                                    <extensionArgs>
+                                        <arg>-Xdv</arg>
+                                    </extensionArgs>
+                                </xsdOption>
+                            </xsdOptions>
+                            <extensions>
+                                <extension>org.apache.cxf.xjcplugins:cxf-xjc-dv:${project.version}</extension>
+                            </extensions>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <xsdOptions>
-                        <xsdOption>
-                            <extension>true</extension>
-                            <xsd>${basedir}/src/test/resources/schemas/configuration/foo.xsd</xsd>
-                            <extensionArgs>
-                                <arg>-Xdv</arg>
-                            </extensionArgs>
-                        </xsdOption>
-                    </xsdOptions>
-                    <extensions>
-                        <extension>org.apache.cxf.xjcplugins:cxf-xjc-dv:${project.version}</extension>
-                    </extensions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
