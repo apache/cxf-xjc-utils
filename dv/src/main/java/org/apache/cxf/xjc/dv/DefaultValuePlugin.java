@@ -36,6 +36,7 @@ import org.xml.sax.ErrorHandler;
 
 import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
@@ -201,9 +202,17 @@ public class DefaultValuePlugin {
                         || isElementRequired(particle))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
-                    if (var != null 
-                        && !"javax.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
-                        var.init(JExpr._new(f.getRawType()));
+                    final JType rawType = f.getRawType();
+                    if (var != null
+                            && !"javax.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
+                        if (rawType instanceof JClass) {
+                            final JClass jclazz = (JClass) rawType;
+                            if (!jclazz.isAbstract() && !jclazz.isInterface()) {
+                                var.init(JExpr._new(rawType));
+                            }
+                        } else {
+                            var.init(JExpr._new(rawType));
+                        }
                     }
                 }
 
