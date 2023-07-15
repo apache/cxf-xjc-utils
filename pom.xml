@@ -55,7 +55,7 @@
         <pmd.eclipse.ruleset>cxf-pmd-ruleset.xml</pmd.eclipse.ruleset>
         <resources.base.path />
         <checkstyle.extension />
-        <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2023-07-15T16:42:39Z</project.build.outputTimestamp>
     </properties>
 
     <modules>
