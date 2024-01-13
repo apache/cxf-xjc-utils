@@ -102,6 +102,7 @@
                 <configuration>
                     <useJava5>true</useJava5>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+                    <goalPrefix>cxf-xjc</goalPrefix>
                 </configuration>
                 <executions>
                     <execution>
