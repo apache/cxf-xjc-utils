@@ -73,6 +73,7 @@
                                     <xsd>${basedir}/src/test/resources/schemas/configuration/foo.xsd</xsd>
                                     <extensionArgs>
                                         <arg>-Xdv</arg>
+                                        <arg>-Xdv:excludedFromDefaultValueGeneration=jakarta.xml.bind.JAXBElement</arg>
                                     </extensionArgs>
                                 </xsdOption>
                             </xsdOptions>

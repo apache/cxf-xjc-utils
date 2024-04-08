@@ -21,6 +21,8 @@ package org.apache.cxf.xjc.dv;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,10 +73,12 @@ import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
  * with their default value.
  */
 public class DefaultValuePlugin {
-    
+
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
+    private static final String COMMA = ",";
     private boolean complexTypes;
     private boolean active;
+    private List<String> ignoredTypes = new ArrayList<>();
     
     public DefaultValuePlugin() {
     }
@@ -84,10 +88,11 @@ public class DefaultValuePlugin {
     }
 
     public String getUsage() {
-        return   "  -Xdv                 : Initialize fields mapped from elements with their default values\n"
-               + "  -Xdv:optional        : Initialize fields mapped from elements with their default values\n"
-               + "                         for elements with minOccurs=0 but with complexTypes containing \n"
-               + "                         fields with default values.";
+        return   "  -Xdv          : Initialize fields mapped from elements with their default values\n"
+               + "  -Xdv:optional : Initialize fields mapped from elements with their default values\n"
+               + "                  for elements with minOccurs=0 but with complexTypes containing \n"
+               + "                  fields with default values.\n"
+               + "  -Xdv:excludedFromDefaultValueGeneration : Init Ignored Types for DV-Generation(comma-separated)";
     }
 
     public int parseArgument(Options opt, String[] args, int index, com.sun.tools.xjc.Plugin plugin) 
@@ -98,6 +103,13 @@ public class DefaultValuePlugin {
             ret = 1;                    
             if (args[index].indexOf(":optional") != -1) {
                 complexTypes = true;
+            }
+            if (args[index].contains(":excludedFromDefaultValueGeneration")) {
+                String arg = args[index];
+                String[] split = arg.split("=");
+                String params = split[split.length - 1];
+                ignoredTypes = Arrays.asList(params.split(COMMA));
+                LOG.info("Ignored Types are: " + ignoredTypes);
             }
             if (!opt.activePlugins.contains(plugin)) {
                 opt.activePlugins.add(plugin);
@@ -143,6 +155,11 @@ public class DefaultValuePlugin {
 
     private boolean isElementRequired(XSParticle particle) {
         return particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1;
+    }
+
+    private boolean isElementAllowedForDefaultValueGeneration(FieldOutline f) {
+        String rawTypeFullname = f.getRawType().fullName();
+        return ignoredTypes.stream().filter(rawTypeFullname::startsWith).findAny().isEmpty();
     }
     
     private int getMinOccurs(XSParticle particle) {
@@ -200,7 +217,7 @@ public class DefaultValuePlugin {
                     && xsType.isComplexType()
                     && !isAbstract(outline, f)
                     && ((complexTypes && containsDefaultValue(outline, f)) 
-                        || isElementRequired(particle))) {
+                        || isElementRequired(particle)) && isElementAllowedForDefaultValueGeneration(f)) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     final JType rawType = f.getRawType();
