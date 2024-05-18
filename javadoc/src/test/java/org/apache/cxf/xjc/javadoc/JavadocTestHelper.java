@@ -41,11 +41,13 @@ public final class JavadocTestHelper {
 
             @Override
             protected boolean matchesSafely(Javadoc javadoc) {
-                TagElement tagElement = (TagElement)javadoc.tags().get(0);
-                List<?> fragments = tagElement.fragments();
-                for (Object fragment : fragments) {
-                    if (fragment != null && fragment.toString().contains(comment)) {
-                        return true;
+                if (!javadoc.tags().isEmpty()) {
+                    TagElement tagElement = (TagElement)javadoc.tags().get(0);
+                    List<?> fragments = tagElement.fragments();
+                    for (Object fragment : fragments) {
+                        if (fragment != null && fragment.toString().contains(comment)) {
+                            return true;
+                        }
                     }
                 }
                 return false;
