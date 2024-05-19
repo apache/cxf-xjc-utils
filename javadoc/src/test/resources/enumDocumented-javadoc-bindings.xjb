@@ -19,7 +19,7 @@
  <jaxb:bindings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
 	xmlns:xjc="https://jakarta.ee/xml/ns/jaxb/xjc"
-	xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_2_0.xsd"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
 	jaxb:version="3.0" schemaLocation="enumDocumented.xsd"
 	node="//xs:simpleType[@name='enumDocumented']">
 	
