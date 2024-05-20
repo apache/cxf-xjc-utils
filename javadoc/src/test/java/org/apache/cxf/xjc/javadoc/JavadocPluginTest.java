@@ -124,11 +124,11 @@ public class JavadocPluginTest extends Assert {
 
         CompilationUnit compilationUnit = parseSourceFile("ComplexTypeWithDocumentedProperties.java");
         Javadoc fieldJavadoc = getJavadocOfField(compilationUnit, "documentedElement");
-        assertThat(fieldJavadoc, not(javadocContains("Some documentation of element")));
+        assertThat(fieldJavadoc, javadocContains("Some documentation of element"));
 
         Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit, "getDocumentedElement");
         assertThat(getterJavadoc, javadocContains("Documentation from JAXB binding customization"));
-        assertThat(getterJavadoc, not(javadocContains("Some documentation of element")));
+        assertThat(getterJavadoc, javadocContains("Some documentation of element"));
     }
 
     @Test
