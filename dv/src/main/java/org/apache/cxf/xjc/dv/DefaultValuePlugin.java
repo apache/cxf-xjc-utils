@@ -21,9 +21,10 @@ package org.apache.cxf.xjc.dv;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,10 +76,17 @@ import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
 public class DefaultValuePlugin {
 
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
-    private static final String COMMA = ",";
+
+    // Known JAXB / JAXWS classes that do not have default constructors.
+    private static final Set<String> KNOWN_NO_DV_CLASSES = new HashSet<>(
+            Arrays.asList(
+                "jakarta.xml.ws.wsaddressing.W3CEndpointReference",
+                "jakarta.xml.bind.JAXBElement"
+            )
+        );
+
     private boolean complexTypes;
     private boolean active;
-    private List<String> ignoredTypes = new ArrayList<>();
     
     public DefaultValuePlugin() {
     }
@@ -88,11 +96,10 @@ public class DefaultValuePlugin {
     }
 
     public String getUsage() {
-        return   "  -Xdv          : Initialize fields mapped from elements with their default values\n"
-               + "  -Xdv:optional : Initialize fields mapped from elements with their default values\n"
-               + "                  for elements with minOccurs=0 but with complexTypes containing \n"
-               + "                  fields with default values.\n"
-               + "  -Xdv:excludedFromDefaultValueGeneration : Init Ignored Types for DV-Generation(comma-separated)";
+        return   "  -Xdv                 : Initialize fields mapped from elements with their default values\n"
+               + "  -Xdv:optional        : Initialize fields mapped from elements with their default values\n"
+               + "                         for elements with minOccurs=0 but with complexTypes containing \n"
+               + "                         fields with default values.";
     }
 
     public int parseArgument(Options opt, String[] args, int index, com.sun.tools.xjc.Plugin plugin) 
@@ -103,13 +110,6 @@ public class DefaultValuePlugin {
             ret = 1;                    
             if (args[index].indexOf(":optional") != -1) {
                 complexTypes = true;
-            }
-            if (args[index].contains(":excludedFromDefaultValueGeneration")) {
-                String arg = args[index];
-                String[] split = arg.split("=");
-                String params = split[split.length - 1];
-                ignoredTypes = Arrays.asList(params.split(COMMA));
-                LOG.info("Ignored Types are: " + ignoredTypes);
             }
             if (!opt.activePlugins.contains(plugin)) {
                 opt.activePlugins.add(plugin);
@@ -157,11 +157,6 @@ public class DefaultValuePlugin {
         return particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1;
     }
 
-    private boolean isElementAllowedForDefaultValueGeneration(FieldOutline f) {
-        String rawTypeFullname = f.getRawType().fullName();
-        return ignoredTypes.stream().filter(rawTypeFullname::startsWith).findAny().isEmpty();
-    }
-    
     private int getMinOccurs(XSParticle particle) {
         try {
             Number o = (Number)particle.getClass().getMethod("getMinOccurs").invoke(particle);
@@ -217,11 +212,11 @@ public class DefaultValuePlugin {
                     && xsType.isComplexType()
                     && !isAbstract(outline, f)
                     && ((complexTypes && containsDefaultValue(outline, f)) 
-                        || isElementRequired(particle)) && isElementAllowedForDefaultValueGeneration(f)) {
+                        || isElementRequired(particle))) {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     final JType rawType = f.getRawType();
-                    if (var != null && !"jakarta.xml.ws.wsaddressing.W3CEndpointReference".equals(rawType.fullName())) {
+                    if (var != null && !KNOWN_NO_DV_CLASSES.contains(rawType.erasure().fullName())) {
                         if (rawType instanceof JClass) {
                             final JClass jclazz = (JClass) rawType;
                             if (!jclazz.isAbstract() && !jclazz.isInterface()) {
