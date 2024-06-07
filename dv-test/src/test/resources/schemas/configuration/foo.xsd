@@ -147,5 +147,21 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="redemptionNumber" type="xs:string" />
       </xs:sequence>
-    </xs:complexType>    
+    </xs:complexType>
+
+    <xs:element name="vehicle" type="tns:vehicle"/>
+    <xs:complexType name="vehicle" abstract="true"/>
+
+    <xs:complexType name="car">
+        <xs:complexContent>
+            <xs:extension base="tns:vehicle"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="car" type="tns:car" substitutionGroup="tns:vehicle"/>
+
+    <xs:complexType name="trip">
+        <xs:sequence>
+            <xs:element ref="tns:vehicle"/>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>
