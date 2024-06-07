@@ -21,7 +21,10 @@ package org.apache.cxf.xjc.dv;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,8 +73,17 @@ import com.sun.xml.xsom.XmlString;
  * with their default value.
  */
 public class DefaultValuePlugin {
-    
+
     private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
+
+    // Known JAXB / JAXWS classes that do not have default constructors.
+    private static final Set<String> KNOWN_NO_DV_CLASSES = new HashSet<>(
+            Arrays.asList(
+                "javax.xml.ws.wsaddressing.W3CEndpointReference",
+                "javax.xml.bind.JAXBElement"
+            )
+        );
+
     private boolean complexTypes;
     private boolean active;
     
@@ -143,7 +155,7 @@ public class DefaultValuePlugin {
     private boolean isElementRequired(XSParticle particle) {
         return particle != null && getMinOccurs(particle) != 0 && getMaxOccurs(particle) == 1;
     }
-    
+
     private int getMinOccurs(XSParticle particle) {
         try {
             Number o = (Number)particle.getClass().getMethod("getMinOccurs").invoke(particle);
@@ -203,8 +215,7 @@ public class DefaultValuePlugin {
                     String varName = f.getPropertyInfo().getName(false);
                     JFieldVar var = co.implClass.fields().get(varName);
                     final JType rawType = f.getRawType();
-                    if (var != null
-                            && !"javax.xml.ws.wsaddressing.W3CEndpointReference".equals(f.getRawType().fullName())) {
+                    if (var != null && !KNOWN_NO_DV_CLASSES.contains(rawType.erasure().fullName())) {
                         if (rawType instanceof JClass) {
                             final JClass jclazz = (JClass) rawType;
                             if (!jclazz.isAbstract() && !jclazz.isInterface()) {
