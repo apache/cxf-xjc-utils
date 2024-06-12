@@ -63,7 +63,7 @@ public class PropertyJavadoc {
         if (documentation == null || "".equals(documentation.trim())) {
             return;
         }
-        setJavadoc(documentation.trim());
+        setJavadoc(documentation.replaceAll("^\\s+|\\s+$|\\s*(\n)\\s*|(\\s)\\s*", "$1$2"));
     }
 
     private XSComponent getDocumentedComponent(CPropertyInfo propertyInfo) {
