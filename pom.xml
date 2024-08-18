@@ -21,7 +21,7 @@
     <groupId>org.apache.cxf.xjc-utils</groupId>
     <artifactId>xjc-utils</artifactId>
     <packaging>pom</packaging>
-    <version>3.3.4</version>
+    <version>3.3.5-SNAPSHOT</version>
     <name>Apache CXF XJC Utils</name>
     <url>https://cxf.apache.org</url>
 
@@ -33,7 +33,7 @@
     <scm>
       <connection>scm:git:https://gitbox.apache.org/repos/asf/cxf-xjc-utils.git</connection>
       <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/cxf-xjc-utils.git</developerConnection>
-      <tag>xjc-utils-3.3.4</tag>
+      <tag>HEAD</tag>
   </scm>
     <issueManagement>
         <system>jira</system>
@@ -55,7 +55,7 @@
         <pmd.eclipse.ruleset>cxf-pmd-ruleset.xml</pmd.eclipse.ruleset>
         <resources.base.path />
         <checkstyle.extension />
-        <project.build.outputTimestamp>2024-08-18T18:49:31Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-08-18T18:52:14Z</project.build.outputTimestamp>
     </properties>
 
     <modules>
