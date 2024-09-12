@@ -361,25 +361,23 @@ public class DefaultValuePlugin {
         if ("java.lang.Boolean".equals(typeName) && isElement) {
             dv = JExpr.direct(Boolean.valueOf(defaultValue) ? "Boolean.TRUE" : "Boolean.FALSE");
         } else if ("java.lang.Byte".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
-                .arg(JExpr.cast(type.unboxify(),
-                    JExpr.lit(Byte.parseByte(defaultValue))));
+            dv = ((JClass) type).staticInvoke("valueOf")
+                .arg(JExpr.cast(type.unboxify(), JExpr.lit(Byte.parseByte(defaultValue))));
         } else if ("java.lang.Double".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
+            dv = ((JClass) type).staticInvoke("valueOf")
                 .arg(JExpr.lit(Double.parseDouble(defaultValue)));
         } else if ("java.lang.Float".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
-                 .arg(JExpr.lit(Float.parseFloat(defaultValue)));
+            dv = ((JClass) type).staticInvoke("valueOf")
+                .arg(JExpr.lit(Float.parseFloat(defaultValue)));
         } else if ("java.lang.Integer".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
+            dv = ((JClass) type).staticInvoke("valueOf")
                 .arg(JExpr.lit(Integer.parseInt(defaultValue)));
         } else if ("java.lang.Long".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
+            dv = ((JClass) type).staticInvoke("valueOf")
                 .arg(JExpr.lit(Long.parseLong(defaultValue)));
         } else if ("java.lang.Short".equals(typeName) && isElement) {
-            dv = JExpr._new(type)
-                .arg(JExpr.cast(type.unboxify(),
-                    JExpr.lit(Short.parseShort(defaultValue))));
+            dv = ((JClass) type).staticInvoke("valueOf")
+                .arg(JExpr.cast(type.unboxify(), JExpr.lit(Short.parseShort(defaultValue))));
         } else if ("java.lang.String".equals(type.fullName()) && isElement) {
             dv = JExpr.lit(defaultValue);
         } else if ("java.math.BigInteger".equals(type.fullName()) && isElement) {
