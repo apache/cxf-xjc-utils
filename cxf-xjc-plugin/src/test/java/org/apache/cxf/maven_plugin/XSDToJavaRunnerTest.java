@@ -53,7 +53,7 @@ public class XSDToJavaRunnerTest {
             }, 
             listener, 
             outputFile, 
-            Collections.emptyList()).run();
+            Collections.<String>emptyList()).run();
         
         assertThat(listener.getFirstError(), is(nullValue()));
     }
