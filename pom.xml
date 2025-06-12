@@ -44,7 +44,7 @@
     </prerequisites>
 
     <properties>
-        <cxf-buildtools-version>4.0.1</cxf-buildtools-version>
+        <cxf-buildtools-version>4.1.1</cxf-buildtools-version>
         <jdk.version>17</jdk.version>
         <jaxb-version>4.0.2</jaxb-version>
         <jaxb-runtime-version>4.0.5</jaxb-runtime-version>
@@ -390,7 +390,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.21.2</version>
+                    <version>3.26.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.cxf.build-utils</groupId>
@@ -401,7 +401,6 @@
                     <configuration>
                         <rulesets>
                             <ruleset>${resources.base.path}cxf-pmd-ruleset.xml</ruleset>
-                            <ruleset>${resources.base.path}cxf-pmd-custom.xml</ruleset>
                         </rulesets>
                         <sourceEncoding>UTF-8</sourceEncoding>
                         <targetJdk>11</targetJdk>
