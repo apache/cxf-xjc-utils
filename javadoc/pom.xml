@@ -48,13 +48,13 @@
 		<dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.app</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.400</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
-            <version>3.37.0</version>
+            <version>3.42.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
