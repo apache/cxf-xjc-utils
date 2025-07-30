@@ -50,7 +50,7 @@ import jakarta.xml.bind.annotation.XmlSchemaType;
  * https://jaxb.dev.java.net/issues/show_bug.cgi?id=671
  */
 public class Bug986Plugin {
-    private static final Logger LOG = Logger.getLogger(Bug986Plugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(Bug986Plugin.class.getName());
 
     final Plugin plugin;
 

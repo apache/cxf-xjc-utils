@@ -44,7 +44,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 
 public class WSDLExtension {
 
-    private static final Logger LOG = Logger.getLogger(WSDLExtension.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(WSDLExtension.class.getName());
 
     public String getOptionName() {
         return "Xwsdlextension";

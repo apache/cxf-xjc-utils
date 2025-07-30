@@ -75,7 +75,7 @@ import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
  */
 public class DefaultValuePlugin {
 
-    private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(DefaultValuePlugin.class.getName());
 
     // Known JAXB / JAXWS classes that do not have default constructors.
     private static final Set<String> KNOWN_NO_DV_CLASSES = new HashSet<>(

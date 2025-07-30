@@ -43,7 +43,7 @@ import com.sun.tools.xjc.outline.Outline;
  */
 public class ToStringPlugin {
     
-    private static final Logger LOG = Logger.getLogger(ToStringPlugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(ToStringPlugin.class.getName());
 
     private String styleFieldName = "DEFAULT_STYLE";
     private String styleClassName = "org.apache.cxf.xjc.runtime.JAXBToStringStyle";

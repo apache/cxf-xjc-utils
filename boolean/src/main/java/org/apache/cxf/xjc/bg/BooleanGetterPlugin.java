@@ -35,7 +35,7 @@ import com.sun.tools.xjc.outline.Outline;
  */
 public class BooleanGetterPlugin {
 
-    private static final Logger LOG = Logger.getLogger(BooleanGetterPlugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(BooleanGetterPlugin.class.getName());
 
     public BooleanGetterPlugin() {
     }

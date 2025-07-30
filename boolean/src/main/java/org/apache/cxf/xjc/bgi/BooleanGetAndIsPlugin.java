@@ -40,7 +40,7 @@ import com.sun.tools.xjc.outline.Outline;
  */
 public class BooleanGetAndIsPlugin {
 
-    private static final Logger LOG = Logger.getLogger(BooleanGetAndIsPlugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(BooleanGetAndIsPlugin.class.getName());
     private static final String IS_PREFIX = "is";
     
     public BooleanGetAndIsPlugin() {
