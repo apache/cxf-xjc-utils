@@ -49,7 +49,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
  */
 public class PropertyListenerPlugin {
     
-    private static final Logger LOG = Logger.getLogger(PropertyListenerPlugin.class.getName()); //NOPMD
+    private static final Logger LOG = Logger.getLogger(PropertyListenerPlugin.class.getName());
     
     public PropertyListenerPlugin() {
     }
