@@ -28,5 +28,13 @@
 				<documentation>Documentation of attribute</documentation>
 			</annotation>
 		</attribute>
+		<attribute name="multilineDocumentedAttribute" type="string">
+			<annotation>
+				<documentation>
+                    Multiline documentation of
+                    attribute
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 </schema>
