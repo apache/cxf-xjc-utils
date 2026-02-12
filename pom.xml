@@ -46,7 +46,7 @@
     <properties>
         <cxf-buildtools-version>4.1.3</cxf-buildtools-version>
         <jdk.version>17</jdk.version>
-        <jaxb-version>4.0.4</jaxb-version>
+        <jaxb-version>4.0.5</jaxb-version>
         <jaxb-runtime-version>4.0.6</jaxb-runtime-version>
 
         <eclipse.outputDirectory>${basedir}/target/classes</eclipse.outputDirectory>
