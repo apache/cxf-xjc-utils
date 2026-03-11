@@ -547,41 +547,14 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         cmd.addArguments(args);
 
-        StreamConsumer out = createStreamConsumer();
-        StreamConsumer err = createStreamConsumer();
-        int exitCode;
-        try {
-            exitCode = CommandLineUtils.executeCommandLine(cmd, out, err);
-        } catch (CommandLineException e) {
-            getLog().debug(e);
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-        
-
-        String cmdLine = CommandLineUtils.toString(cmd.getCommandline());
-
-        if (exitCode != 0) {
-            StringBuffer msg = new StringBuffer("\nExit code: ");
-            msg.append(exitCode);
-            msg.append('\n');
-            msg.append("Command line was: ").append(cmdLine).append('\n').append('\n');
-
-            throw new MojoExecutionException(msg.toString());
-        }
-
-        file.delete();
-        return 0;
-    }
-
-    private StreamConsumer createStreamConsumer() {
-        return new StreamConsumer() {
+        StreamConsumer out = new StreamConsumer() {
             File file;
             int severity;
             int linenum;
             int column;
             StringBuilder message = new StringBuilder();
 
-            public void consumeLine(String line) {
+            public synchronized void consumeLine(String line) {
                 if (getLog().isDebugEnabled()) {
                     getLog().debug(line);
                 }
@@ -613,6 +586,28 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                 }
             }
         };
+        int exitCode;
+        try {
+            exitCode = CommandLineUtils.executeCommandLine(cmd, out, out);
+        } catch (CommandLineException e) {
+            getLog().debug(e);
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+
+
+        String cmdLine = CommandLineUtils.toString(cmd.getCommandline());
+
+        if (exitCode != 0) {
+            StringBuffer msg = new StringBuffer("\nExit code: ");
+            msg.append(exitCode);
+            msg.append('\n');
+            msg.append("Command line was: ").append(cmdLine).append('\n').append('\n');
+
+            throw new MojoExecutionException(msg.toString());
+        }
+
+        file.delete();
+        return 0;
     }
 
 }
