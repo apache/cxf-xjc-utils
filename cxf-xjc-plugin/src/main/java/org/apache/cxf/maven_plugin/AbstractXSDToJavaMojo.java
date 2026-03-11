@@ -553,8 +553,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             int linenum;
             int column;
             StringBuilder message = new StringBuilder();
-            
-            public void consumeLine(String line) {
+
+            public synchronized void consumeLine(String line) {
                 if (getLog().isDebugEnabled()) {
                     getLog().debug(line);
                 }
@@ -593,7 +593,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             getLog().debug(e);
             throw new MojoExecutionException(e.getMessage(), e);
         }
-        
+
 
         String cmdLine = CommandLineUtils.toString(cmd.getCommandline());
 
@@ -609,5 +609,5 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         file.delete();
         return 0;
     }
-    
+
 }
