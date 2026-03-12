@@ -63,7 +63,7 @@ public class PropertyJavadoc {
         if (documentation == null || "".equals(documentation.trim())) {
             return;
         }
-        setJavadoc(documentation.trim());
+        setJavadoc(trimLines(documentation));
     }
 
     private XSComponent getDocumentedComponent(CPropertyInfo propertyInfo) {
@@ -75,6 +75,21 @@ public class PropertyJavadoc {
         } else {
             return null;
         }
+    }
+
+    static String trimLines(String text) {
+        String[] lines = text.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                if (sb.length() > 0) {
+                    sb.append('\n');
+                }
+                sb.append(trimmed);
+            }
+        }
+        return sb.toString();
     }
 
     private void setJavadoc(String documentation) {
