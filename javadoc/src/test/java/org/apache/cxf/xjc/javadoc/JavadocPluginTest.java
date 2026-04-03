@@ -97,6 +97,10 @@ public class JavadocPluginTest extends Assert {
 
         Javadoc setterJavadoc = getJavadocOfMethod(compilationUnit, "setDocumentedElement");
         assertThat(setterJavadoc, containsTag("@see", "#getDocumentedElement()"));
+
+        Javadoc fieldMultilineJavadoc = getJavadocOfField(compilationUnit, "multilineDocumentedElement");
+        assertThat(fieldMultilineJavadoc, javadocContains("Some multiline documentation of"));
+        assertThat(fieldMultilineJavadoc, javadocContains("element"));
     }
 
     @Test
@@ -154,6 +158,10 @@ public class JavadocPluginTest extends Assert {
 
         Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit, "getDocumentedAttribute");
         assertThat(getterJavadoc, javadocContains("Documentation of attribute"));
+
+        Javadoc fieldMultilineJavadoc = getJavadocOfField(compilationUnit, "multilineDocumentedAttribute");
+        assertThat(fieldMultilineJavadoc, javadocContains("Multiline documentation of"));
+        assertThat(fieldMultilineJavadoc, javadocContains("attribute"));
     }
 
     @Test
