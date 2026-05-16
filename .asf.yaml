@@ -5,7 +5,7 @@ github:
       branches:
         includes:
           - "~DEFAULT_BRANCH"
-          - "release/*"
+          - "\d+.\d+.x-fixes*"
           - "rel/*"
         excludes: []
       bypass_teams:
