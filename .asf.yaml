@@ -6,7 +6,6 @@ github:
         includes:
           - "~DEFAULT_BRANCH"
           - "[0-9]+.[0-9]+.x-fixes"
-          - "rel/*"
         excludes: []
       bypass_teams:
         - root
