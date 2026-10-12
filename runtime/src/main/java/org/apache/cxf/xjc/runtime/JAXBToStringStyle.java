@@ -19,6 +19,11 @@
 
 package org.apache.cxf.xjc.runtime;
 
+import java.util.Collection;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import jakarta.xml.bind.JAXBElement;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -78,7 +83,95 @@ class JAXBToStringStyleImpl extends ToStringStyle {
         if (value instanceof JAXBElement) {
             buffer.append(ToStringBuilder.reflectionToString(value, this));
         } else {
+            appendValue(buffer, value);
+        }
+    }
+
+    @Override
+    protected void appendDetail(StringBuffer buffer, String fieldName, char value) {
+        appendEscaped(buffer, String.valueOf(value));
+    }
+
+    /*
+     * Older commons-lang3 releases append collections and maps via their own
+     * toString(), which bypasses both the escaping below and cycle detection.
+     * Route each element through appendInternal instead (as commons-lang3
+     * 3.21+ does), keeping the AbstractCollection/AbstractMap layout.
+     */
+    @Override
+    protected void appendDetail(StringBuffer buffer, String fieldName, Collection<?> coll) {
+        buffer.append('[');
+        boolean first = true;
+        for (Object item : coll) {
+            if (!first) {
+                buffer.append(", ");
+            }
+            first = false;
+            appendElement(buffer, fieldName, item);
+        }
+        buffer.append(']');
+    }
+
+    @Override
+    protected void appendDetail(StringBuffer buffer, String fieldName, Map<?, ?> map) {
+        buffer.append('{');
+        boolean first = true;
+        for (Map.Entry<?, ?> e : map.entrySet()) {
+            if (!first) {
+                buffer.append(", ");
+            }
+            first = false;
+            appendElement(buffer, fieldName, e.getKey());
+            buffer.append('=');
+            appendElement(buffer, fieldName, e.getValue());
+        }
+        buffer.append('}');
+    }
+
+    private void appendElement(StringBuffer buffer, String fieldName, Object item) {
+        if (item == null) {
+            appendNullText(buffer, fieldName);
+        } else {
+            appendInternal(buffer, fieldName, item, true);
+        }
+    }
+
+    /*
+     * Text values and XML names (whose namespace URI can carry character
+     * references such as &#10;) usually come straight off the wire, so escape
+     * them to stop a value from forging extra log lines or terminal escape
+     * sequences.
+     * Other objects (e.g. nested generated beans) render through their own
+     * toString(), which escapes their text fields in turn.
+     */
+    private static void appendValue(StringBuffer buffer, Object value) {
+        if (value instanceof CharSequence || value instanceof Character || value instanceof QName) {
+            appendEscaped(buffer, value.toString());
+        } else {
             buffer.append(value);
         }
-    } 
+    }
+
+    private static void appendEscaped(StringBuffer buffer, String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+            case '\n':
+                buffer.append("\\n");
+                break;
+            case '\r':
+                buffer.append("\\r");
+                break;
+            case '\t':
+                buffer.append("\\t");
+                break;
+            default:
+                if (Character.isISOControl(c) || c == '\u2028' || c == '\u2029') {
+                    buffer.append(String.format("\\u%04x", (int)c));
+                } else {
+                    buffer.append(c);
+                }
+            }
+        }
+    }
 }
