@@ -113,6 +113,15 @@ public class JAXBToStringStyleEscapingTest {
     }
 
     @Test
+    public void testNullMapValue() {
+        Bean b = new Bean();
+        b.otherAttributes = Collections.singletonMap(new QName("attr"), null);
+        String ts = ToStringBuilder.reflectionToString(b, JAXBToStringStyle.DEFAULT_STYLE);
+        // same as ToStringStyle's own map handling
+        Assert.assertTrue(ts, ts.contains("otherAttributes={attr=null}"));
+    }
+
+    @Test
     public void testPlainTextUnchanged() {
         Bean b = new Bean();
         b.name = "caf\u00e9 \"quoted\" back\\slash";

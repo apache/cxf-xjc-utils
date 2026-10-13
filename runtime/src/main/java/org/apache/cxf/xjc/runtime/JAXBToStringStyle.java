@@ -93,10 +93,10 @@ class JAXBToStringStyleImpl extends ToStringStyle {
     }
 
     /*
-     * Older commons-lang3 releases append collections and maps via their own
-     * toString(), which bypasses both the escaping below and cycle detection.
-     * Route each element through appendInternal instead (as commons-lang3
-     * 3.21+ does), keeping the AbstractCollection/AbstractMap layout.
+     * Same as ToStringStyle in commons-lang3 3.21+, which routes each element
+     * through appendInternal (and so through the escaping and cycle detection
+     * below). Older commons-lang3 releases append coll/map.toString() instead,
+     * which bypasses both, so the 3.21 behaviour is copied here.
      */
     @Override
     protected void appendDetail(StringBuffer buffer, String fieldName, Collection<?> coll) {
@@ -107,7 +107,11 @@ class JAXBToStringStyleImpl extends ToStringStyle {
                 buffer.append(", ");
             }
             first = false;
-            appendElement(buffer, fieldName, item);
+            if (item == null) {
+                appendNullText(buffer, fieldName);
+            } else {
+                appendInternal(buffer, fieldName, item, true);
+            }
         }
         buffer.append(']');
     }
@@ -118,19 +122,21 @@ class JAXBToStringStyleImpl extends ToStringStyle {
         boolean first = true;
         for (Map.Entry<?, ?> e : map.entrySet()) {
             if (!first) {
-                buffer.append(", ");
+                buffer.append(getArraySeparator());
+                buffer.append(' ');
             }
             first = false;
-            appendElement(buffer, fieldName, e.getKey());
-            buffer.append('=');
-            appendElement(buffer, fieldName, e.getValue());
+            appendMapItem(buffer, fieldName, e.getKey());
+            buffer.append(getFieldNameValueSeparator());
+            appendMapItem(buffer, fieldName, e.getValue());
         }
         buffer.append('}');
     }
 
-    private void appendElement(StringBuffer buffer, String fieldName, Object item) {
+    private void appendMapItem(StringBuffer buffer, String fieldName, Object item) {
         if (item == null) {
-            appendNullText(buffer, fieldName);
+            // what appendInternal(null) gives in 3.21+; older releases throw NPE
+            appendDetail(buffer, fieldName, (Object) null);
         } else {
             appendInternal(buffer, fieldName, item, true);
         }
