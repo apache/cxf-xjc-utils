@@ -21,10 +21,7 @@ package org.apache.cxf.xjc.bug986;
 
 
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -34,10 +31,8 @@ import org.xml.sax.ErrorHandler;
 
 import com.sun.codemodel.JAnnotationUse;
 import com.sun.codemodel.JAnnotationValue;
-import com.sun.codemodel.JClass;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
-import com.sun.codemodel.JVar;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.outline.ClassOutline;
@@ -75,11 +70,13 @@ public class Bug986Plugin {
         for (ClassOutline classOutline : outline.getClasses()) {
             Map<String, JFieldVar> fields = classOutline.implClass.fields();
             for (JFieldVar field : fields.values()) {
-                Collection<JAnnotationUse> annotations = getAnnotations(field);
-                List<JAnnotationUse> toRemove = new ArrayList<JAnnotationUse>();
-                for (JAnnotationUse j : annotations) {
-                    if (XmlSchemaType.class.getName().equals(getAnnotationClass(j).fullName())) {
-                        JAnnotationValue st = getAnnotationMember(j, "name");
+                List<JAnnotationUse> toRemove = new ArrayList<>();
+                for (JAnnotationUse j : field.annotations()) {
+                    if (XmlSchemaType.class.getName().equals(j.getAnnotationClass().fullName())) {
+                        JAnnotationValue st = j.getAnnotationMembers().get("name");
+                        if (st == null) {
+                            continue;
+                        }
                         StringWriter sw = new StringWriter();
                         st.generate(new JFormatter(sw));
                         if ("\"anySimpleType\"".equals(sw.toString())) {
@@ -96,56 +93,10 @@ public class Bug986Plugin {
                     }
                 }
                 for (JAnnotationUse j : toRemove) {
-                    annotations.remove(j);
+                    field.removeAnnotation(j);
                 }
             }
         }
         return true;
-    }
-    
-    private JAnnotationValue getAnnotationMember(JAnnotationUse ju, String name) {
-        try {
-            Field f = JAnnotationUse.class.getDeclaredField("memberValues");
-            f.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, JAnnotationValue> memberValues = (Map<String, JAnnotationValue>)f.get(ju);
-            if (memberValues == null) {
-                return null;
-            }
-            return memberValues.get(name);
-        } catch (Throwable t) {
-            //ignore for now
-            t.printStackTrace();
-        }
-        return null;
-    }
-    
-    private JClass getAnnotationClass(JAnnotationUse ju) {
-        try {
-            Field f = JAnnotationUse.class.getDeclaredField("clazz");
-            f.setAccessible(true);
-            return (JClass)f.get(ju);
-        } catch (Throwable t) {
-            //ignore for now
-            t.printStackTrace();
-        }
-        return null;
-    }
-    
-    @SuppressWarnings("unchecked")
-    private List<JAnnotationUse> getAnnotations(JFieldVar field) {
-        try {
-            Field f = JVar.class.getDeclaredField("annotations");
-            f.setAccessible(true);
-            List<?> anns = (List<?>)f.get(field);
-            if (anns == null) {
-                anns = Collections.emptyList();
-            }
-            return (List<JAnnotationUse>)anns;
-        } catch (Throwable t) {
-            //ignore for now
-            t.printStackTrace();
-        }
-        return Collections.emptyList();
     }
 }
