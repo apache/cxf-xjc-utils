@@ -23,7 +23,9 @@ import java.util.logging.Logger;
 
 import org.xml.sax.ErrorHandler;
 
+import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JType;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
@@ -51,10 +53,16 @@ public class BooleanGetterPlugin {
     public boolean run(Outline outline, Options opt, ErrorHandler errorHandler) {
         LOG.info("Running boolean getter plugin.");
         for (ClassOutline classOutline : outline.getClasses()) {
-            Collection<JMethod> methods = classOutline.implClass.methods();
+            JDefinedClass implClass = classOutline.implClass;
+            Collection<JMethod> methods = implClass.methods();
             for (JMethod method : methods) {
-                if (method.name().startsWith("is")) {
+                if (isBooleanGetter(method)) {
                     String newName = "get" + method.name().substring(2);
+                    if (implClass.getMethod(newName, new JType[0]) != null) {
+                        LOG.warning("Not renaming " + implClass.fullName() + "." + method.name()
+                                    + "() as " + newName + "() already exists");
+                        continue;
+                    }
                     LOG.info("Changing method name from " + method.name() + " to " + newName);
                     method.javadoc().add(
                                          "\nThis getter has been renamed from " + method.name() + "() to "
@@ -64,6 +72,16 @@ public class BooleanGetterPlugin {
             }
         }
         return true;
+    }
+
+    private static boolean isBooleanGetter(JMethod method) {
+        String name = method.name();
+        if (!name.startsWith("is") || name.length() > 2 && Character.isLowerCase(name.charAt(2))
+            || !method.params().isEmpty() || method.hasVarArgs()) {
+            return false;
+        }
+        String type = method.type().fullName();
+        return "boolean".equals(type) || "java.lang.Boolean".equals(type);
     }
 
 }

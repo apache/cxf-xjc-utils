@@ -75,6 +75,13 @@
                         </xsdOption>
                         <xsdOption>
                             <extension>true</extension>
+                            <xsd>${basedir}/src/test/resources/schemas/configuration/foo2.xsd</xsd>
+                            <extensionArgs>
+                                <arg>-Xbg</arg>
+                            </extensionArgs>
+                        </xsdOption>
+                        <xsdOption>
+                            <extension>true</extension>
                             <xsd>${basedir}/src/test/resources/schemas/configuration/foo1.xsd</xsd>
                             <extensionArgs>
                                 <arg>-Xbgi</arg>
