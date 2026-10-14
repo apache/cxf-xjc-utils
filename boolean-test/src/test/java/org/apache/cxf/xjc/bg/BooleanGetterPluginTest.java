@@ -19,7 +19,9 @@
 package org.apache.cxf.xjc.bg;
 
 import org.apache.cxf.configuration.foo.Foo;
+import org.apache.cxf.configuration.foo2.Toggle;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class BooleanGetterPluginTest {
@@ -30,6 +32,27 @@ public class BooleanGetterPluginTest {
         Foo foo = new org.apache.cxf.configuration.foo.ObjectFactory().createFoo();
 
         foo.getBooleanAttr();
+    }
+
+    @Test
+    public void testExistingGetterIsNotDuplicated() throws Exception {
+        // Toggle only compiles if isSetFlag() was not renamed to clash with getSetFlag()
+        Toggle toggle = new org.apache.cxf.configuration.foo2.ObjectFactory().createToggle();
+        toggle.setFlag(Boolean.TRUE);
+        toggle.setSetFlag("text");
+
+        Assert.assertEquals(Boolean.TRUE, toggle.getFlag());
+        Assert.assertEquals("text", toggle.getSetFlag());
+        Assert.assertTrue(toggle.isSetFlag());
+        Assert.assertTrue(toggle.getSetSetFlag());
+        Assert.assertEquals(String.class, Toggle.class.getMethod("getSetFlag").getReturnType());
+        Assert.assertNotNull(Toggle.class.getMethod("get1St"));
+        try {
+            Toggle.class.getMethod("isFlag");
+            Assert.fail("isFlag() should have been renamed");
+        } catch (NoSuchMethodException e) {
+            // expected
+        }
     }
 
 }
