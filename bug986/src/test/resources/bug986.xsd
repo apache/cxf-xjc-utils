@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements. See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership. The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<!--
+  Mapping xs:anySimpleType to a non-String type leaves
+  @XmlSchemaType(name = "anySimpleType") on the generated attribute field.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+    xmlns:tns="http://cxf.apache.org/bug986" targetNamespace="http://cxf.apache.org/bug986"
+    elementFormDefault="qualified" jaxb:version="3.0">
+
+    <xs:annotation>
+        <xs:appinfo>
+            <jaxb:globalBindings>
+                <jaxb:javaType name="java.lang.Integer" xmlType="xs:anySimpleType"
+                    parseMethod="java.lang.Integer.valueOf" printMethod="java.lang.String.valueOf"/>
+            </jaxb:globalBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:complexType name="holder">
+        <xs:attribute name="intAttr" type="xs:anySimpleType"/>
+        <xs:attribute name="stringAttr" type="xs:anySimpleType">
+            <xs:annotation>
+                <xs:appinfo>
+                    <jaxb:property>
+                        <jaxb:baseType>
+                            <jaxb:javaType name="java.lang.String"
+                                parseMethod="jakarta.xml.bind.DatatypeConverter.parseString"
+                                printMethod="jakarta.xml.bind.DatatypeConverter.printString"/>
+                        </jaxb:baseType>
+                    </jaxb:property>
+                </xs:appinfo>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+</xs:schema>
