@@ -21,9 +21,12 @@ package org.apache.cxf.xjc.dv;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,6 +122,68 @@ public class DefaultValuePlugin {
         return ret;
     }
 
+    /**
+     * A field to be initialized with a new instance of its (complex) type.
+     */
+    private static final class PendingInit {
+        final JDefinedClass owner;
+        final JFieldVar var;
+        final JType type;
+
+        PendingInit(JDefinedClass owner, JFieldVar var, JType type) {
+            this.owner = owner;
+            this.var = var;
+            this.type = type;
+        }
+    }
+
+    /*
+     * Initialize the fields with "new Type()", except where constructing Type would,
+     * through further initializers or its superclasses, construct the owning class
+     * again, e.g. a type with a required (or, with -Xdv:optional, an optional) element
+     * of its own type. Such an initializer would recurse until StackOverflowError.
+     */
+    private void initComplexTypeFields(List<PendingInit> pendingInits) {
+        Map<JType, List<JType>> constructs = new HashMap<>();
+        for (PendingInit p : pendingInits) {
+            constructs.computeIfAbsent(p.owner, k -> new ArrayList<>()).add(p.type);
+        }
+        for (PendingInit p : pendingInits) {
+            if (constructs(constructs, p.type, p.owner, new HashSet<>())) {
+                LOG.warning("Not initializing " + p.owner.fullName() + "." + p.var.name()
+                            + " as constructing " + p.type.fullName() + " would recurse");
+            } else {
+                p.var.init(JExpr._new(p.type));
+            }
+        }
+    }
+
+    // whether constructing "type" runs the field initializers of "target"
+    private static boolean constructs(Map<JType, List<JType>> constructs, JType type, JType target,
+                                      Set<JType> seen) {
+        if (type == target) {
+            return true;
+        }
+        if (!seen.add(type)) {
+            return false;
+        }
+        if (type instanceof JDefinedClass) {
+            JClass superClass = ((JDefinedClass)type)._extends();
+            if (superClass != null && constructs(constructs, superClass, target, seen)) {
+                return true;
+            }
+        }
+        List<JType> types = constructs.get(type);
+        if (types != null) {
+            for (JType t : types) {
+                if (constructs(constructs, t, target, seen)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean isAbstract(Outline outline, FieldOutline field) {
         for (ClassOutline classOutline : outline.getClasses()) {
             if (classOutline.implClass == field.getRawType() 
@@ -179,6 +244,7 @@ public class DefaultValuePlugin {
             return true;
         }
         LOG.fine("Running default value plugin.");
+        List<PendingInit> pendingInits = new ArrayList<>();
         for (ClassOutline co : outline.getClasses()) {
             for (FieldOutline f : co.getDeclaredFields()) {
 
@@ -220,10 +286,10 @@ public class DefaultValuePlugin {
                         if (rawType instanceof JClass) {
                             final JClass jclazz = (JClass) rawType;
                             if (!jclazz.isAbstract() && !jclazz.isInterface()) {
-                                var.init(JExpr._new(rawType));
+                                pendingInits.add(new PendingInit(co.implClass, var, rawType));
                             }
                         } else {
-                            var.init(JExpr._new(rawType));
+                            pendingInits.add(new PendingInit(co.implClass, var, rawType));
                         }
                     }
                 }
@@ -266,7 +332,8 @@ public class DefaultValuePlugin {
                 }
             }
         }
-        
+        initComplexTypeFields(pendingInits);
+
         for (PackageOutline po :outline.getAllPackageContexts()) {
             //also fixup some unecessary casts
             JDefinedClass cls = po.objectFactoryGenerator().getObjectFactory();

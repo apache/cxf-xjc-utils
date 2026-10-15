@@ -102,6 +102,26 @@
                             </extensions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>recursive</id>
+                        <goals>
+                            <goal>xsdtojava-tests</goal>
+                        </goals>
+                        <configuration>
+                            <xsdOptions>
+                                <xsdOption>
+                                    <extension>true</extension>
+                                    <xsd>${basedir}/src/test/resources/schemas/configuration/recursive.xsd</xsd>
+                                    <extensionArgs>
+                                        <arg>-Xdv:optional</arg>
+                                    </extensionArgs>
+                                </xsdOption>
+                            </xsdOptions>
+                            <extensions>
+                                <extension>org.apache.cxf.xjcplugins:cxf-xjc-dv:${project.version}</extension>
+                            </extensions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
