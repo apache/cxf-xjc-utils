@@ -27,10 +27,9 @@ import java.util.logging.Logger;
 
 import org.xml.sax.ErrorHandler;
 
-import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JType;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
@@ -63,21 +62,20 @@ public class BooleanGetAndIsPlugin {
 
     private void processClass(ClassOutline clazz) {
         Collection<JMethod> methods = clazz.implClass.methods();
-        Map<String, JType> methodsToAdd = new HashMap<String, JType>();
+        Map<String, JMethod> methodsToAdd = new HashMap<String, JMethod>();
         for (JMethod method : methods) {
             if (method.name().startsWith(IS_PREFIX) && requiresGetter(methods, method)) {
-                methodsToAdd.put(method.name(), method.type());
+                methodsToAdd.put(method.name(), method);
             }
         }
         
-        Iterator<Entry<String, JType>> todo = methodsToAdd.entrySet().iterator();
+        Iterator<Entry<String, JMethod>> todo = methodsToAdd.entrySet().iterator();
         while (todo.hasNext()) {
-            Entry<String, JType> entry = todo.next();
-            String newName = "get" + entry.getKey().substring(2);
+            JMethod isMethod = todo.next().getValue();
+            String newName = "get" + isMethod.name().substring(2);
             LOG.info("Adding method " + newName);
-            JMethod newMethod = clazz.implClass.method(JMod.PUBLIC, entry.getValue(), newName);
-            JBlock body = newMethod.body();
-            body.directStatement("return " + entry.getKey() + "();");
+            JMethod newMethod = clazz.implClass.method(JMod.PUBLIC, isMethod.type(), newName);
+            newMethod.body()._return(JExpr.invoke(isMethod));
         }
     }
     
