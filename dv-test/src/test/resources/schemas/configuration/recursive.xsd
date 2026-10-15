@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements. See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership. The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License. You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<!--
+  Types whose complex-type field initializers would construct the owning
+  class again; compiled with -Xdv:optional.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://cxf.apache.org/configuration/recursive"
+    targetNamespace="http://cxf.apache.org/configuration/recursive" elementFormDefault="qualified">
+
+    <!-- optional reference to its own type, which contains a default value -->
+    <xs:complexType name="node">
+        <xs:sequence>
+            <xs:element name="label" type="xs:string" default="x" minOccurs="0"/>
+            <xs:element name="next" type="tns:node" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- a subclass constructs its base class -->
+    <xs:complexType name="base">
+        <xs:sequence>
+            <xs:element name="derived" type="tns:derived"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="derived">
+        <xs:complexContent>
+            <xs:extension base="tns:base">
+                <xs:sequence>
+                    <xs:element name="value" type="xs:int"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- not recursive, so still initialized -->
+    <xs:complexType name="holder">
+        <xs:sequence>
+            <xs:element name="leaf" type="tns:leaf"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="leaf">
+        <xs:sequence>
+            <xs:element name="value" type="xs:int" default="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
