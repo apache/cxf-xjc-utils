@@ -20,6 +20,7 @@ package org.apache.cxf.xjc.bgi;
 
 import org.apache.cxf.configuration.foo1.Foo;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class BooleanGetAndIsPluginTest {
@@ -29,8 +30,11 @@ public class BooleanGetAndIsPluginTest {
 
         Foo foo = new org.apache.cxf.configuration.foo1.ObjectFactory().createFoo();
 
-        foo.getBooleanAttr();
-        foo.isBooleanAttr();
+        // getXxx() delegates to isXxx()
+        Assert.assertTrue(foo.isBooleanAttr());
+        Assert.assertTrue(foo.getBooleanAttr());
+        foo.setBooleanAttr(false);
+        Assert.assertFalse(foo.getBooleanAttr());
     }
 
 }
