@@ -66,9 +66,6 @@ import org.sonatype.plexus.build.incremental.BuildContext;
  * CXF XSD To Java Tool
  */
 public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
-    // longest part of the schema location kept in a marker file name, to stay within file system limits
-    private static final int MAX_DONE_FILE_NAME_LENGTH = 150;
-
     @Component
     protected MavenProject project;
     
@@ -275,8 +272,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                             }
                             int i = run(xsdOptions[x], xsdFile, outputDir);
                             if (i == 0) {
-                                doneFile.delete();
-                                doneFile.createNewFile();
+                                // the location is only recorded for reference, the timestamp is what is checked
+                                Files.write(doneFile.toPath(), location.getBytes(StandardCharsets.UTF_8));
                             }
                             File[] dirs = xsdOptions[x].getDeleteDirs();
                             if (dirs != null) {
@@ -301,26 +298,19 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     }
     
     /*
-     * The name of the marker file recording that the given schema location was processed.
-     * Characters that are invalid in file names are replaced, so a hash of the location is
-     * added to keep different locations (e.g. "a/b.xsd" and "a_b.xsd") from sharing a marker.
+     * The name of the marker file recording that the given schema location was processed: a hash
+     * of the location, which is unique and needs no escaping of characters invalid in file names.
      */
-    static String getDoneFileName(String location) {
-        String name = location.replace('?', '_')
-            .replace('&', '_').replace('/', '_').replace('\\', '_')
-            .replace(':', '_').replace('!', '_');
-        if (name.length() > MAX_DONE_FILE_NAME_LENGTH) {
-            name = name.substring(name.length() - MAX_DONE_FILE_NAME_LENGTH);
-        }
+    static String getDoneFileName(String location) throws MojoExecutionException {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(location.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hash = new StringBuilder();
-            for (int i = 0; i < 8; i++) {
-                hash.append(String.format("%02x", digest[i]));
+            StringBuilder name = new StringBuilder(".");
+            for (byte b : digest) {
+                name.append(String.format("%02x", b));
             }
-            return "." + name + "-" + hash + ".DONE";
+            return name.append(".DONE").toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new MojoExecutionException(e);
         }
     }
 

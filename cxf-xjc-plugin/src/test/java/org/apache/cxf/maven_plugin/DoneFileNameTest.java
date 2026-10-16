@@ -25,35 +25,25 @@ import org.junit.Test;
 public class DoneFileNameTest {
 
     @Test
-    public void testDistinctLocationsGetDistinctMarkers() {
+    public void testDistinctLocationsGetDistinctMarkers() throws Exception {
         // both used to map to ".src_main_resources_schemas_a_b.xsd.DONE"
-        String nested = AbstractXSDToJavaMojo.getDoneFileName("src/main/resources/schemas/a/b.xsd");
-        String flat = AbstractXSDToJavaMojo.getDoneFileName("src/main/resources/schemas/a_b.xsd");
-        Assert.assertNotEquals(nested, flat);
-        Assert.assertTrue(nested, nested.startsWith(".src_main_resources_schemas_a_b.xsd-"));
-        Assert.assertTrue(nested, nested.endsWith(".DONE"));
+        Assert.assertNotEquals(AbstractXSDToJavaMojo.getDoneFileName("src/main/resources/schemas/a/b.xsd"),
+                               AbstractXSDToJavaMojo.getDoneFileName("src/main/resources/schemas/a_b.xsd"));
     }
 
     @Test
-    public void testSameLocationGetsSameMarker() {
+    public void testSameLocationGetsSameMarker() throws Exception {
         Assert.assertEquals(AbstractXSDToJavaMojo.getDoneFileName("http://host/a.xsd?x=1&y=2"),
                             AbstractXSDToJavaMojo.getDoneFileName("http://host/a.xsd?x=1&y=2"));
     }
 
     @Test
-    public void testNoPathSeparatorsOrInvalidCharacters() {
-        String name = AbstractXSDToJavaMojo.getDoneFileName("jar:file:/c:/x/y.jar!/a/../b.xsd?q=1&r=2");
-        Assert.assertFalse(name, name.matches(".*[/\\\\:?&!].*"));
-    }
-
-    @Test
-    public void testLongLocationIsShortened() {
-        StringBuilder location = new StringBuilder("http://host");
+    public void testMarkerIsAPlainFileName() throws Exception {
+        StringBuilder location = new StringBuilder("jar:file:/c:/x/y.jar!/a/../b.xsd?q=1&r=2");
         for (int i = 0; i < 100; i++) {
             location.append("/segment").append(i);
         }
-        String name = AbstractXSDToJavaMojo.getDoneFileName(location.append("/a.xsd").toString());
-        Assert.assertTrue(name, name.length() < 255);
-        Assert.assertTrue(name, name.contains("a.xsd-"));
+        String name = AbstractXSDToJavaMojo.getDoneFileName(location.toString());
+        Assert.assertTrue(name, name.matches("\\.[0-9a-f]{64}\\.DONE"));
     }
 }
