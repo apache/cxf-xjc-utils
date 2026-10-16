@@ -27,7 +27,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -207,18 +210,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     URI xsdURI = mapLocation(xsdFile);
                     URI basedir = project.getBasedir().toURI();
 
-                    String doneFileName = xsdURI.toString();
-                    if (doneFileName.startsWith(basedir.toString())) {
-                        doneFileName = doneFileName.substring(basedir.toString().length());
+                    String location = xsdURI.toString();
+                    if (location.startsWith(basedir.toString())) {
+                        location = location.substring(basedir.toString().length());
                     }
-
-                    doneFileName = doneFileName.replace('?', '_')
-                        .replace('&', '_').replace('/', '_').replace('\\', '_')
-                        .replace(':', '_').replace('!', '_');
-
-                    // If URL to WSDL, replace ? and & since they're invalid chars for file names
-                    File doneFile =
-                        new File(markerDirectory, "." + doneFileName + ".DONE");
+                    File doneFile = new File(markerDirectory, getDoneFileName(location));
 
                     long srctimestamp = 0;
                     if ("file".equals(xsdURI.getScheme())) {
@@ -276,8 +272,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                             }
                             int i = run(xsdOptions[x], xsdFile, outputDir);
                             if (i == 0) {
-                                doneFile.delete();
-                                doneFile.createNewFile();
+                                // the location is only recorded for reference, the timestamp is what is checked
+                                Files.write(doneFile.toPath(), location.getBytes(StandardCharsets.UTF_8));
                             }
                             File[] dirs = xsdOptions[x].getDeleteDirs();
                             if (dirs != null) {
@@ -301,6 +297,23 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     
+    /*
+     * The name of the marker file recording that the given schema location was processed: a hash
+     * of the location, which is unique and needs no escaping of characters invalid in file names.
+     */
+    static String getDoneFileName(String location) throws MojoExecutionException {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(location.getBytes(StandardCharsets.UTF_8));
+            StringBuilder name = new StringBuilder(".");
+            for (byte b : digest) {
+                name.append(String.format("%02x", b));
+            }
+            return name.append(".DONE").toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new MojoExecutionException(e);
+        }
+    }
+
     private String[] getXsdFiles(String xsdDir, String xsd) throws MojoExecutionException {
         final String[] xsdFiles;
         if (xsdDir != null && !xsdDir.isEmpty()) {
