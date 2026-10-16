@@ -27,7 +27,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,6 +66,9 @@ import org.sonatype.plexus.build.incremental.BuildContext;
  * CXF XSD To Java Tool
  */
 public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
+    // longest part of the schema location kept in a marker file name, to stay within file system limits
+    private static final int MAX_DONE_FILE_NAME_LENGTH = 150;
+
     @Component
     protected MavenProject project;
     
@@ -207,18 +213,11 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                     URI xsdURI = mapLocation(xsdFile);
                     URI basedir = project.getBasedir().toURI();
 
-                    String doneFileName = xsdURI.toString();
-                    if (doneFileName.startsWith(basedir.toString())) {
-                        doneFileName = doneFileName.substring(basedir.toString().length());
+                    String location = xsdURI.toString();
+                    if (location.startsWith(basedir.toString())) {
+                        location = location.substring(basedir.toString().length());
                     }
-
-                    doneFileName = doneFileName.replace('?', '_')
-                        .replace('&', '_').replace('/', '_').replace('\\', '_')
-                        .replace(':', '_').replace('!', '_');
-
-                    // If URL to WSDL, replace ? and & since they're invalid chars for file names
-                    File doneFile =
-                        new File(markerDirectory, "." + doneFileName + ".DONE");
+                    File doneFile = new File(markerDirectory, getDoneFileName(location));
 
                     long srctimestamp = 0;
                     if ("file".equals(xsdURI.getScheme())) {
@@ -301,6 +300,30 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
     }
     
+    /*
+     * The name of the marker file recording that the given schema location was processed.
+     * Characters that are invalid in file names are replaced, so a hash of the location is
+     * added to keep different locations (e.g. "a/b.xsd" and "a_b.xsd") from sharing a marker.
+     */
+    static String getDoneFileName(String location) {
+        String name = location.replace('?', '_')
+            .replace('&', '_').replace('/', '_').replace('\\', '_')
+            .replace(':', '_').replace('!', '_');
+        if (name.length() > MAX_DONE_FILE_NAME_LENGTH) {
+            name = name.substring(name.length() - MAX_DONE_FILE_NAME_LENGTH);
+        }
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(location.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hash = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                hash.append(String.format("%02x", digest[i]));
+            }
+            return "." + name + "-" + hash + ".DONE";
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private String[] getXsdFiles(String xsdDir, String xsd) throws MojoExecutionException {
         final String[] xsdFiles;
         if (xsdDir != null && !xsdDir.isEmpty()) {
