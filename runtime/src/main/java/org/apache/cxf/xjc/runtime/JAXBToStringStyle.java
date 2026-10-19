@@ -20,6 +20,7 @@
 package org.apache.cxf.xjc.runtime;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -51,6 +52,21 @@ public final class JAXBToStringStyle {
 class JAXBToStringStyleImpl extends ToStringStyle {
     private static final long serialVersionUID = -584903238590491314L;
 
+    /*
+     * The state of the toString() call in progress on this thread, removed once it completes or
+     * fails. commons-lang3 only detects cycles (objects on the current path), so an object
+     * referenced from several places, e.g. through xs:IDREF, would otherwise be printed once per
+     * path, which grows exponentially with the depth of such references.
+     */
+    private static final ThreadLocal<CallState> STATE = new ThreadLocal<>();
+
+    private static final class CallState {
+        // objects already printed in detail during the current top-level call
+        final Map<Object, Object> rendered = new IdentityHashMap<>();
+        // how many field values are being appended, 0 between the fields of the top-level object
+        int depth;
+    }
+
     JAXBToStringStyleImpl() {
         super();
     }
@@ -72,6 +88,63 @@ class JAXBToStringStyleImpl extends ToStringStyle {
         }
     }
         
+    private static CallState callState() {
+        CallState state = STATE.get();
+        if (state == null) {
+            state = new CallState();
+            STATE.set(state);
+        }
+        return state;
+    }
+
+    // for tests: whether this thread holds any state, which it should only during a call
+    static boolean hasCallState() {
+        return STATE.get() != null;
+    }
+
+    @Override
+    public void appendStart(StringBuffer buffer, Object object) {
+        CallState state = callState();
+        if (state.depth == 0) {
+            // a new top-level call
+            state.rendered.clear();
+        }
+        if (object != null) {
+            state.rendered.put(object, null);
+        }
+        super.appendStart(buffer, object);
+    }
+
+    @Override
+    public void appendEnd(StringBuffer buffer, Object object) {
+        try {
+            super.appendEnd(buffer, object);
+        } finally {
+            CallState state = STATE.get();
+            if (state == null || state.depth == 0) {
+                STATE.remove();
+            }
+        }
+    }
+
+    // nested toString() calls happen within this, so it tracks whether a call is top-level
+    @Override
+    protected void appendInternal(StringBuffer buffer, String fieldName, Object value, boolean detail) {
+        CallState state = callState();
+        state.depth++;
+        try {
+            super.appendInternal(buffer, fieldName, value, detail);
+        } catch (RuntimeException | Error e) {
+            if (state.depth == 1) {
+                // the top-level toString() call fails, so don't keep its state
+                STATE.remove();
+            }
+            throw e;
+        } finally {
+            state.depth--;
+        }
+    }
+
     /*
      * Introspect into JAXBElement as a special case as it does not have a
      * toString() and we loose the content
@@ -80,7 +153,10 @@ class JAXBToStringStyleImpl extends ToStringStyle {
      */
     @Override
     protected void appendDetail(StringBuffer buffer, String fieldName, Object value) {
-        if (value instanceof JAXBElement) {
+        if (value != null && callState().rendered.containsKey(value)) {
+            // already printed in detail, so just identify it as for a cycle
+            appendCyclicObject(buffer, fieldName, value);
+        } else if (value instanceof JAXBElement) {
             buffer.append(ToStringBuilder.reflectionToString(value, this));
         } else {
             appendValue(buffer, value);
