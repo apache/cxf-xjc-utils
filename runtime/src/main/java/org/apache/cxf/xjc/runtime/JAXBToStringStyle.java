@@ -58,7 +58,7 @@ class JAXBToStringStyleImpl extends ToStringStyle {
      * referenced from several places, e.g. through xs:IDREF, would otherwise be printed once per
      * path, which grows exponentially with the depth of such references.
      */
-    private static final ThreadLocal<CallState> STATE = new ThreadLocal<>();
+    private static final ThreadLocal<CallState> STATE = ThreadLocal.withInitial(CallState::new);
 
     private static final class CallState {
         // objects already printed in detail during the current top-level call
@@ -89,17 +89,14 @@ class JAXBToStringStyleImpl extends ToStringStyle {
     }
         
     private static CallState callState() {
-        CallState state = STATE.get();
-        if (state == null) {
-            state = new CallState();
-            STATE.set(state);
-        }
-        return state;
+        return STATE.get();
     }
 
-    // for tests: whether this thread holds any state, which it should only during a call
-    static boolean hasCallState() {
-        return STATE.get() != null;
+    // for tests: whether this thread's state is clear, as it should be between calls
+    static boolean isCallStateClear() {
+        CallState state = STATE.get();
+        STATE.remove();
+        return state.depth == 0 && state.rendered.isEmpty();
     }
 
     @Override
@@ -120,8 +117,7 @@ class JAXBToStringStyleImpl extends ToStringStyle {
         try {
             super.appendEnd(buffer, object);
         } finally {
-            CallState state = STATE.get();
-            if (state == null || state.depth == 0) {
+            if (callState().depth == 0) {
                 STATE.remove();
             }
         }

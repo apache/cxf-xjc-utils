@@ -120,10 +120,10 @@ public class JAXBToStringStyleSharedReferenceTest {
         } catch (IllegalStateException e) {
             // expected
         }
-        Assert.assertFalse(JAXBToStringStyleImpl.hasCallState());
+        Assert.assertTrue(JAXBToStringStyleImpl.isCallStateClear());
         node.left = new Node("ok");
         Assert.assertTrue(node.toString().contains("id=ok"));
-        Assert.assertFalse(JAXBToStringStyleImpl.hasCallState());
+        Assert.assertTrue(JAXBToStringStyleImpl.isCallStateClear());
     }
 
     private static int count(String s, String part) {
