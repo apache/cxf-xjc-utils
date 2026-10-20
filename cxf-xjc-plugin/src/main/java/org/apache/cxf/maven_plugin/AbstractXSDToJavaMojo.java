@@ -560,45 +560,7 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         }
         cmd.addArguments(args);
 
-        StreamConsumer out = new StreamConsumer() {
-            File file;
-            int severity;
-            int linenum;
-            int column;
-            StringBuilder message = new StringBuilder();
-
-            public synchronized void consumeLine(String line) {
-                if (getLog().isDebugEnabled()) {
-                    getLog().debug(line);
-                }
-                if (line.startsWith("DONE")) {
-                    buildContext.addMessage(file, linenum, column, message.toString(), severity, null);
-                } else if (line.startsWith("MSG: ")
-                    || line.startsWith("ERROR: ")
-                    || line.startsWith("WARNING: ")) {
-                    file = new File(line.substring(line.indexOf(' ')).trim());
-                    String type = line.substring(0, line.indexOf(':'));
-                    if (type.contains("ERROR")) {
-                        severity = BuildContext.SEVERITY_ERROR;
-                    } else if (type.contains("WARNING")) {
-                        severity = BuildContext.SEVERITY_WARNING;
-                    } else {
-                        severity = 0;
-                    }
-                    linenum = 0;
-                    column = 0;
-                    message.setLength(0);
-                } else if (line.startsWith("Col: ")) {
-                    column = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
-                } else if (line.startsWith("Line: ")) {
-                    linenum = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
-                } else if (line.startsWith("Severity: ")) {
-                    severity = Integer.parseInt(line.substring(line.indexOf(' ')).trim());
-                } else {
-                    message.append(line).append('\n');
-                }
-            }
-        };
+        StreamConsumer out = new ForkedOutputConsumer(buildContext, getLog());
         int exitCode;
         try {
             exitCode = CommandLineUtils.executeCommandLine(cmd, out, out);
