@@ -31,7 +31,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 
 /*
- * Override default styles to recognise JAXBElement as needing introspection
+ * Override default styles to recognise JAXBElement as needing introspection.
+ *
+ * These styles print the value of every field of an object, so any sensitive data it holds,
+ * e.g. passwords or tokens, is included in its toString() and wherever that is logged.
  */
 public final class JAXBToStringStyle {
 

@@ -40,6 +40,11 @@ import com.sun.tools.xjc.outline.Outline;
 /**
  * Modifies the JAXB code model to override the Object.toString() method with an 
  * implementation that provides a String representation of the xml content.
+ * <p>
+ * The generated toString() includes the value of every field, so passwords, tokens or
+ * personal data held in a generated object end up wherever the object is logged or printed.
+ * Avoid logging such objects, or use -Xts:style with a ToStringStyle that leaves out or masks
+ * the sensitive fields.
  */
 public class ToStringPlugin {
     
@@ -64,7 +69,9 @@ public class ToStringPlugin {
             +  "         equivalent to: "
             +  "-Xts:style:org.apache.cxf.xjc.runtime.JAXBToStringStyle.SIMPLE_STYLE\n"
             +  "  -Xts:style:org.apache.commons.lang3.builder.ToStringStyle.FIELD : The full class+field\n"
-            +  "         name of the ToStringStyle to use.";
+            +  "         name of the ToStringStyle to use.\n"
+            +  "         Note: toString() includes the value of every field, including any sensitive\n"
+            +  "         data, so take care when logging generated objects.";
     }
 
     public int parseArgument(Options opt, String[] args, int index, com.sun.tools.xjc.Plugin plugin) 
