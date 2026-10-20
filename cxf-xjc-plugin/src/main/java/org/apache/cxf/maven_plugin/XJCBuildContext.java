@@ -110,7 +110,9 @@ public class XJCBuildContext implements BuildContext {
         }
         if (cause != null) {
             StringWriter trace = new StringWriter();
-            cause.printStackTrace(new PrintWriter(trace));
+            try (PrintWriter pw = new PrintWriter(trace)) {
+                cause.printStackTrace(pw);
+            }
             text.append('\n').append(trace);
         }
         return MESSAGE_PREFIX + severity + '\t' + line + '\t' + column + '\t'
