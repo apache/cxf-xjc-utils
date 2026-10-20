@@ -9,7 +9,7 @@ A collection of XJC (JAXB XML-to-Java compiler) plugins and utilities for use wi
 | `bug671` | Fix for XJC bug 671 — corrects generated code for certain schema patterns |
 | `bug986` | Fix for XJC bug 986 — corrects generated code for certain schema patterns |
 | `dv` | Data validation plugin — annotates generated classes with Bean Validation (JSR-303) constraints derived from XML Schema facets (e.g. `minLength`, `maxOccurs`, `pattern`) |
-| `ts` | Type substitution plugin — enables proper handling of `xsi:type` substitution in generated code |
+| `ts` | toString plugin — adds a `toString()` to generated classes that prints the value of every field (using `cxf-xjc-runtime` at runtime). This includes any sensitive data, such as passwords or tokens, so take care when logging generated objects |
 | `wsdlextension` | WSDL extension utilities — supports additional WSDL processing during CXF code generation |
 
 ## Usage
