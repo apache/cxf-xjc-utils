@@ -94,6 +94,36 @@ public class XSDToJavaRunner {
         }
     }
     
+    /**
+     * Parses an XML catalog with external DTD and schema access disabled, so that a catalog
+     * cannot be used as an XXE vector (reading local files or making network requests while it
+     * is parsed). A legitimate OASIS XML catalog needs neither, so this does not restrict normal
+     * use. The restriction is applied only around the catalog parse and then restored, so it does
+     * not affect how the schemas themselves are parsed.
+     */
+    static void parseCatalog(CatalogResolver catalogResolver, String catalogPath) throws IOException {
+        String dtdKey = "javax.xml.accessExternalDTD";
+        String schemaKey = "javax.xml.accessExternalSchema";
+        String dtd = System.getProperty(dtdKey);
+        String schema = System.getProperty(schemaKey);
+        System.setProperty(dtdKey, "");
+        System.setProperty(schemaKey, "");
+        try {
+            catalogResolver.getCatalog().parseCatalog(catalogPath);
+        } finally {
+            restore(dtdKey, dtd);
+            restore(schemaKey, schema);
+        }
+    }
+
+    private static void restore(String key, String value) {
+        if (value == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, value);
+        }
+    }
+
     public int run() throws Exception {
         List<URL> urls = new ArrayList<URL>();
         for (String s : cpList) {
@@ -151,7 +181,7 @@ public class XSDToJavaRunner {
                     if (entityResolver == null) {
                         entityResolver = catResolver;
                     }
-                    catResolver.getCatalog().parseCatalog(catalogFile.getPath());
+                    parseCatalog(catResolver, catalogFile.getPath());
                 }
             };
 
