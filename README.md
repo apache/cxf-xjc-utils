@@ -89,8 +89,8 @@ Then activate the plugin in your `wsdl2java` configuration:
 
 ## Requirements
 
-- Java 11+
-- Maven 3.x
+- Java 17+
+- Maven 3.6.3+
 - Apache CXF 4.x (see [Versioning](#versioning))
 
 ## Building from Source
