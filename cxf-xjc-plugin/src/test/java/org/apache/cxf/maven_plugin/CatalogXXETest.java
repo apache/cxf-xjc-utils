@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.cxf.maven_plugin;
 
 import java.io.File;
@@ -34,16 +33,18 @@ import org.junit.rules.TemporaryFolder;
 
 public class CatalogXXETest {
 
-    private static final String PROP = "javax.xml.accessExternalDTD";
-
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
 
-    private CatalogResolver newResolver() {
+    private CatalogResolver newResolver(boolean harden) {
         CatalogManager cm = new CatalogManager();
         cm.setUseStaticCatalog(false);
         cm.setIgnoreMissingProperties(true);
-        return new CatalogResolver(cm);
+        CatalogResolver resolver = new CatalogResolver(cm);
+        if (harden) {
+            XSDToJavaRunner.hardenCatalogParsing(resolver);
+        }
+        return resolver;
     }
 
     private File catalog(String name, String content) throws Exception {
@@ -66,14 +67,14 @@ public class CatalogXXETest {
     @Test
     public void hardenedParseDoesNotFetchExternalDtd() throws Exception {
         // must not throw: the external DTD is not fetched
-        XSDToJavaRunner.parseCatalog(newResolver(), maliciousCatalog().getPath());
+        newResolver(true).getCatalog().parseCatalog(maliciousCatalog().getPath());
     }
 
     @Test
     public void rawParseWouldFetchExternalDtd() throws Exception {
         // documents the behaviour the hardening guards against: the unhardened parser fetches
         try {
-            newResolver().getCatalog().parseCatalog(maliciousCatalog().getPath());
+            newResolver(false).getCatalog().parseCatalog(maliciousCatalog().getPath());
             // if xml-resolver is ever fixed upstream this may stop fetching; then the hardening
             // is belt-and-braces rather than load-bearing, which is fine
         } catch (FileNotFoundException expected) {
@@ -89,15 +90,24 @@ public class CatalogXXETest {
             "<?xml version='1.0'?>\n"
             + "<catalog xmlns='urn:oasis:names:tc:entity:xmlns:xml:catalog'>"
             + "<system systemId='urn:good' uri='" + mapped.toURI() + "'/></catalog>");
-        CatalogResolver resolver = newResolver();
-        XSDToJavaRunner.parseCatalog(resolver, cat.getPath());
+        CatalogResolver resolver = newResolver(true);
+        resolver.getCatalog().parseCatalog(cat.getPath());
         Assert.assertEquals(mapped.toURI().toString(), resolver.getCatalog().resolveSystem("urn:good"));
     }
 
     @Test
-    public void propertyIsRestoredAfterParse() throws Exception {
-        String before = System.getProperty(PROP);
-        XSDToJavaRunner.parseCatalog(newResolver(), maliciousCatalog().getPath());
-        Assert.assertEquals(before, System.getProperty(PROP));
+    public void catalogDeclaringTheOasisDtdStillResolves() throws Exception {
+        // a DOCTYPE is allowed; only fetching external content is disabled
+        File mapped = new File(tmp.getRoot(), "real.xsd");
+        Files.write(mapped.toPath(), "<schema/>".getBytes(StandardCharsets.UTF_8));
+        File cat = catalog("oasis.cat",
+            "<?xml version='1.0'?>\n"
+            + "<!DOCTYPE catalog PUBLIC '-//OASIS//DTD XML Catalogs V1.0//EN'"
+            + " 'http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd'>\n"
+            + "<catalog xmlns='urn:oasis:names:tc:entity:xmlns:xml:catalog'>"
+            + "<system systemId='urn:good' uri='" + mapped.toURI() + "'/></catalog>");
+        CatalogResolver resolver = newResolver(true);
+        resolver.getCatalog().parseCatalog(cat.getPath());
+        Assert.assertEquals(mapped.toURI().toString(), resolver.getCatalog().resolveSystem("urn:good"));
     }
 }

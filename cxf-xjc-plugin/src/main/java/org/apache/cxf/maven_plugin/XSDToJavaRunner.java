@@ -29,6 +29,9 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -55,6 +58,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import org.apache.xml.resolver.CatalogManager;
+import org.apache.xml.resolver.readers.SAXCatalogReader;
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
@@ -95,32 +99,40 @@ public class XSDToJavaRunner {
     }
     
     /**
-     * Parses an XML catalog with external DTD and schema access disabled, so that a catalog
-     * cannot be used as an XXE vector (reading local files or making network requests while it
-     * is parsed). A legitimate OASIS XML catalog needs neither, so this does not restrict normal
-     * use. The restriction is applied only around the catalog parse and then restored, so it does
-     * not affect how the schemas themselves are parsed.
+     * Replaces the SAX reader a catalog resolver uses to parse XML catalog files with one whose
+     * parser does not resolve external entities or DTDs, so that a catalog cannot be used as an
+     * XXE vector (reading local files or making network requests while it is parsed). A DOCTYPE
+     * declaration is still allowed, so a legitimate OASIS catalog that declares the catalog DTD
+     * keeps working; only the fetching of external content is disabled. This mirrors the reader
+     * registration done by the resolver itself (see Catalog.setupReaders), with a hardened parser
+     * factory, and leaves the plain-text catalog reader (which does no XML parsing) in place.
      */
-    static void parseCatalog(CatalogResolver catalogResolver, String catalogPath) throws IOException {
-        String dtdKey = "javax.xml.accessExternalDTD";
-        String schemaKey = "javax.xml.accessExternalSchema";
-        String dtd = System.getProperty(dtdKey);
-        String schema = System.getProperty(schemaKey);
-        System.setProperty(dtdKey, "");
-        System.setProperty(schemaKey, "");
-        try {
-            catalogResolver.getCatalog().parseCatalog(catalogPath);
-        } finally {
-            restore(dtdKey, dtd);
-            restore(schemaKey, schema);
-        }
+    static void hardenCatalogParsing(CatalogResolver catalogResolver) {
+        SAXCatalogReader reader = new SAXCatalogReader(secureSAXParserFactory());
+        reader.setCatalogParser(null, "XCatalog",
+                                "org.apache.xml.resolver.readers.XCatalogReader");
+        reader.setCatalogParser("urn:oasis:names:tc:entity:xmlns:xml:catalog", "catalog",
+                                "org.apache.xml.resolver.readers.OASISXMLCatalogReader");
+        catalogResolver.getCatalog().addReader("application/xml", reader);
     }
 
-    private static void restore(String key, String value) {
-        if (value == null) {
-            System.clearProperty(key);
-        } else {
-            System.setProperty(key, value);
+    private static SAXParserFactory secureSAXParserFactory() {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setValidating(false);
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
+        setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
+        return factory;
+    }
+
+    private static void setFeature(SAXParserFactory factory, String feature, boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (ParserConfigurationException | SAXException e) {
+            // a parser that does not know the feature cannot be hardened with it; the remaining
+            // features still apply
         }
     }
 
@@ -175,13 +187,14 @@ public class XSDToJavaRunner {
                     }
                 }
             };
+            hardenCatalogParsing(catResolver);
             final Options opt = new Options() {
                 @Override
                 public void addCatalog(File catalogFile) throws IOException {
                     if (entityResolver == null) {
                         entityResolver = catResolver;
                     }
-                    parseCatalog(catResolver, catalogFile.getPath());
+                    catResolver.getCatalog().parseCatalog(catalogFile.getPath());
                 }
             };
 
