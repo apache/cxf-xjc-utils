@@ -41,16 +41,18 @@ public class XSDToJavaRunnerTest {
         final XJCErrorListener listener = new XJCErrorListener(context);
 
         final File outputFile = outputFolder.newFile();
+        final File genDir = outputFolder.newFolder("gen");
         final String xjb = getClass().getResource("/schemas/wsdl/test.xjb").toExternalForm();
         final String xsd = getClass().getResource("/schemas/wsdl/test.xsd").toExternalForm();
         final String catalog = getClass().getResource("/schemas/configuration/catalog.cat").toExternalForm();
-        
+
         new XSDToJavaRunner(
             new String [] {
                 "-catalog", catalog,
                 "-b", xjb,
-                xsd 
-            }, 
+                "-d", genDir.getAbsolutePath(),
+                xsd
+            },
             listener, 
             outputFile, 
             Collections.<String>emptyList()).run();
