@@ -67,6 +67,11 @@ import org.sonatype.plexus.build.incremental.BuildContext;
  */
 public class XSDToJavaRunner {
     static Class<?> modelLoaderClass;
+
+    // The JAXP system property (JAXP 1.5) that restricts which protocols may be used to resolve
+    // external DTDs and external entities; an empty value forbids all such resolution. This is the
+    // system-property name, which differs from the equivalent factory attribute in XMLConstants.
+    private static final String ACCESS_EXTERNAL_DTD_PROPERTY = "javax.xml.accessExternalDTD";
     
     final String[] args;
     final List<String> cpList;
@@ -208,13 +213,29 @@ public class XSDToJavaRunner {
             // set up the context class loader so that the user-specified plugin
             // on classpath can be loaded from there with jaxb-xjc 2.3.0
             ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+            // Parse the schema (and binding) documents with external DTD and external entity
+            // resolution disabled, so that a crafted schema cannot read local files or reach the
+            // network through a DOCTYPE or an external entity (an XXE attack). XML Schema has no
+            // use for DTDs, so legitimate schemas are unaffected; schema import/include, which is
+            // resolved through the entity resolver and catalog, is not touched by this property.
+            final String prevAccessExternalDtd = System.getProperty(ACCESS_EXTERNAL_DTD_PROPERTY);
+            System.setProperty(ACCESS_EXTERNAL_DTD_PROPERTY, "");
+            final Model model;
             try {
-                Thread.currentThread().setContextClassLoader(opt.getUserClassLoader(origLoader));
-                opt.parseArguments(args);
+                try {
+                    Thread.currentThread().setContextClassLoader(opt.getUserClassLoader(origLoader));
+                    opt.parseArguments(args);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(origLoader);
+                }
+                model = loadModel(opt);
             } finally {
-                Thread.currentThread().setContextClassLoader(origLoader);
+                if (prevAccessExternalDtd == null) {
+                    System.clearProperty(ACCESS_EXTERNAL_DTD_PROPERTY);
+                } else {
+                    System.setProperty(ACCESS_EXTERNAL_DTD_PROPERTY, prevAccessExternalDtd);
+                }
             }
-            Model model = loadModel(opt); 
             if (model == null) {
                 listener.message(xsdFile, "Failed to create model");
                 return -1;
