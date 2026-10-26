@@ -87,6 +87,8 @@ Then activate the plugin in your `wsdl2java` configuration:
 </plugin>
 ```
 
+XJC extensions are loaded only from the artifacts listed under `<extensions>` and from the `<dependencies>` of the `cxf-xjc-plugin` itself, not from the dependencies of your project. If you previously relied on an XJC extension being found as a project dependency, add it to `<extensions>` instead.
+
 ## Requirements
 
 - Java 17+

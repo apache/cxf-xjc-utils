@@ -81,6 +81,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
     
     /**
      * The extension artifacts that will be retrieved and added to the classpath.
+     * XJC plugins are only loaded from these and from the dependencies of this Maven plugin,
+     * not from the dependencies of the project.
      */
     @Parameter
     private List<String> extensions;
@@ -518,18 +520,28 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
             JarArchiver jar = new JarArchiver();
             jar.setDestFile(file.getAbsoluteFile());
 
+            // Only the plugin's own dependencies go on the class path of the forked process. The
+            // project classpath is passed separately, for resolving classpath: catalog entries,
+            // as XJC loads plugins (and JAXP implementations) from the class path, and so would
+            // run code from any dependency of the project that registered one.
             Manifest manifest = new Manifest();
             Attribute attr = new Attribute();
             attr.setName("Class-Path");
             StringBuilder b = new StringBuilder(8000);
+            for (Artifact a : pluginArtifacts) {
+                b.append(a.getFile().toURI().toURL().toExternalForm()).append(' ');
+            }
+            attr.setValue(b.toString());
+            manifest.getMainSection().addConfiguredAttribute(attr);
+
+            attr = new Attribute();
+            attr.setName(XSDToJavaRunner.PROJECT_CLASSPATH_ATTRIBUTE);
+            b = new StringBuilder(8000);
             for (String cp : getClasspathElements()) {
                 URI uri = mapLocation(cp);
                 if (uri != null) {
                     b.append(uri.toString()).append(' ');
                 }
-            }
-            for (Artifact a : pluginArtifacts) {
-                b.append(a.getFile().toURI().toURL().toExternalForm()).append(' ');
             }
             attr.setValue(b.toString());
             manifest.getMainSection().addConfiguredAttribute(attr);

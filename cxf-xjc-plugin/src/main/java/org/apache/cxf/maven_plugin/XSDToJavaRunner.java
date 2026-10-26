@@ -28,6 +28,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,6 +68,9 @@ import org.sonatype.plexus.build.incremental.BuildContext;
  * 
  */
 public class XSDToJavaRunner {
+    // The manifest attribute of the forked process's jar holding the project classpath
+    static final String PROJECT_CLASSPATH_ATTRIBUTE = "CXF-XJC-Project-Classpath";
+
     static Class<?> modelLoaderClass;
 
     // The JAXP system property (JAXP 1.5) that restricts which protocols may be used to resolve
@@ -149,16 +154,21 @@ public class XSDToJavaRunner {
                 urls.add(file.toURI().toURL());
             }
         }
+        // The "-classpath" arguments are the configured extension artifacts. XJC plugins are only
+        // loaded from these (and the cxf-xjc-plugin's own dependencies), not from the project's
+        // classpath above: XJC instantiates every plugin registered in META-INF/services on the
+        // classpath it is given, so any dependency of the project could otherwise run code here.
+        List<URL> extensionUrls = new ArrayList<URL>();
         for (int x = 0; x < args.length - 1; x++) {
             if ("-classpath".equals(args[x])) {
                 File file = getFile(args[x + 1], listener);
                 if (file != null && file.exists()) {
-                    cpList.add(file.getAbsolutePath());
-                    urls.add(file.getAbsoluteFile().toURI().toURL());
+                    extensionUrls.add(file.getAbsoluteFile().toURI().toURL());
                 }
                 x++;
             }
         }
+        urls.addAll(extensionUrls);
 
         try (URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]),
                                                       this.getClass().getClassLoader())) {
@@ -203,7 +213,9 @@ public class XSDToJavaRunner {
                 }
             };
 
-            for (URL url : urls) {
+            // the project classpath stays available to the catalog resolver (for classpath: entries)
+            // through "loader", but only the extensions are on the classpath XJC loads plugins from
+            for (URL url : extensionUrls) {
                 opt.classpaths.add(url);
             }
             if (checkXmlElementRef()) {
@@ -411,12 +423,37 @@ public class XSDToJavaRunner {
         return false;
     }
 
+    /**
+     * Reads the project classpath that AbstractXSDToJavaMojo records in the manifest of the jar
+     * used to run a forked process. It is kept out of the manifest Class-Path, so that the
+     * project's dependencies are not on the class path XJC loads plugins from.
+     */
+    static List<String> getProjectClasspath(File jar) throws IOException {
+        List<String> cplist = new ArrayList<String>();
+        if (!jar.isFile()) {
+            return cplist;
+        }
+        try (JarFile jarFile = new JarFile(jar)) {
+            Manifest manifest = jarFile.getManifest();
+            String cp = manifest == null ? null : manifest.getMainAttributes().getValue(PROJECT_CLASSPATH_ATTRIBUTE);
+            if (cp != null) {
+                for (String s : cp.split(" ")) {
+                    if (!s.isEmpty()) {
+                        cplist.add(s);
+                    }
+                }
+            }
+        }
+        return cplist;
+    }
+
     public static void main(String[] args) throws Exception {
         BuildContext context = new XJCBuildContext();
         XJCErrorListener listener = new XJCErrorListener(context);
 
-        List<String> cplist = new ArrayList<String>();
-        
+        // with "-jar" the class path is just the jar AbstractXSDToJavaMojo created for this run
+        List<String> cplist = getProjectClasspath(new File(System.getProperty("java.class.path")));
+
         File outputFile = getFile(args[args.length - 1], listener);
         if (outputFile == null) {
             outputFile = new File(args[args.length - 1]);
