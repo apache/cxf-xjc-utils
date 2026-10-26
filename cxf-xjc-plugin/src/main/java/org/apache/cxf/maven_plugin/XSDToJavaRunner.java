@@ -20,6 +20,7 @@
 package org.apache.cxf.maven_plugin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -186,7 +187,15 @@ public class XSDToJavaRunner {
                     try {
                         final URL url;
                         if (resolved.startsWith("classpath:")) {
-                            url = loader.getResource(resolved.substring("classpath:".length()));
+                            String resource = resolved.substring("classpath:".length());
+                            url = loader.getResource(resource);
+                            if (url == null) {
+                                // say what is missing, then fall back to the default resolution
+                                listener.warning(xsdFile, new FileNotFoundException("Resource " + resource
+                                    + ", which the catalog maps "
+                                    + (systemId != null ? systemId : publicId) + " to, is not on the classpath"));
+                                return null;
+                            }
                             iSource.setSystemId(url.toExternalForm());
                         } else {
                             url = new URL(resolved);
