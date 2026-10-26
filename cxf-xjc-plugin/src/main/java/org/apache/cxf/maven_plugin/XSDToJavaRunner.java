@@ -301,7 +301,9 @@ public class XSDToJavaRunner {
         } catch (Exception e) {
             listener.error("Failed to create model", e);
         } catch (Throwable e) {
-            e.printStackTrace();
+            // report it through the listener rather than printing the raw stack trace: in a forked
+            // process that would be outside the escaped message lines AbstractXSDToJavaMojo reads
+            listener.error("Failed to create model", new Exception(e));
         }
         return null;
     }
