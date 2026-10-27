@@ -88,6 +88,10 @@ public class ToStringPlugin {
                     styleFieldName = "SIMPLE_STYLE";                    
                 } else {
                     int idx = v.lastIndexOf('.');
+                    if (idx <= 0 || idx == v.length() - 1) {
+                        throw new BadCommandLineException("Invalid -Xts:style value \"" + v
+                            + "\": expected multiline, simple or the full class+field name of a ToStringStyle");
+                    }
                     styleFieldName = v.substring(idx + 1);
                     styleClassName = v.substring(0, idx);
                 }

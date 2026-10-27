@@ -280,7 +280,8 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
                             File[] dirs = xsdOptions[x].getDeleteDirs();
                             if (dirs != null) {
                                 for (File dir : dirs) {
-                                    result = result && deleteDir(dir);
+                                    // delete every dir, even after one could not be deleted
+                                    result = deleteDir(dir) && result;
                                 }
                             }
                             buildContext.refresh(outputDirFile);
@@ -464,11 +465,14 @@ public abstract class AbstractXSDToJavaMojo extends AbstractMojo {
         
     }
     
-    private boolean deleteDir(File f) {
+    static boolean deleteDir(File f) {
         if (f.isDirectory()) {
+            // null if the directory could not be read, in which case deleting it fails below
             File[] files = f.listFiles();
-            for (File file : files) {
-                deleteDir(file);
+            if (files != null) {
+                for (File file : files) {
+                    deleteDir(file);
+                }
             }
         }
         
