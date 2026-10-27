@@ -469,7 +469,15 @@ public class XSDToJavaRunner {
         if (outputFile == null) {
             outputFile = new File(args[args.length - 1]);
         }
-        int i = new XSDToJavaRunner(args, listener, outputFile, cplist).run();
+        int i;
+        try {
+            i = new XSDToJavaRunner(args, listener, outputFile, cplist).run();
+        } catch (Throwable t) {
+            // e.g. an XJC plugin failing while generating code: report it through the listener, as
+            // AbstractXSDToJavaMojo only picks up the escaped message lines from this process
+            listener.error("Failed to generate code", t instanceof Exception ? (Exception)t : new Exception(t));
+            i = -1;
+        }
         System.exit(i);
     }
 
