@@ -68,6 +68,8 @@ public class DefaultValueTest extends Assert {
                      "hello", foo.getStringAttr());
         assertTrue("Unexpected value for attribute booleanAttr",
                      foo.isBooleanAttr());
+        assertTrue("Unexpected value for attribute booleanNumericAttr",
+                     foo.isBooleanNumericAttr());
         assertEquals("Unexpected value for attribute integerAttr",
                      new BigInteger("111"), foo.getIntegerAttr());
         assertEquals("Unexpected value for attribute intAttr",
@@ -82,6 +84,10 @@ public class DefaultValueTest extends Assert {
                      116F, foo.getFloatAttr(), 0F);
         assertEquals("Unexpected value for attribute doubleAttr",
                      117D, foo.getDoubleAttr(), 0D);
+        assertEquals("Unexpected value for attribute floatInfAttr",
+                     Float.POSITIVE_INFINITY, foo.getFloatInfAttr(), 0F);
+        assertTrue("Unexpected value for attribute doubleNaNAttr",
+                     Double.isNaN(foo.getDoubleNaNAttr()));
         assertEquals("Unexpected value for attribute byteAttr",
                      118, foo.getByteAttr());
         
@@ -175,6 +181,8 @@ public class DefaultValueTest extends Assert {
                      "hello", foo.getStringElem());
         assertTrue("Unexpected value for element booleanElem",
                      foo.isBooleanElem());
+        assertTrue("Unexpected value for element booleanNumericElem",
+                     foo.isBooleanNumericElem());
         assertEquals("Unexpected value for element integerElem",
                      new BigInteger("11"), foo.getIntegerElem());
         assertEquals("Unexpected value for element intElem",
@@ -189,6 +197,10 @@ public class DefaultValueTest extends Assert {
                      16F, foo.getFloatElem(), 0F);
         assertEquals("Unexpected value for element doubleElem",
                      17D, foo.getDoubleElem(), 0D);
+        assertTrue("Unexpected value for element floatNaNElem",
+                     Float.isNaN(foo.getFloatNaNElem()));
+        assertEquals("Unexpected value for element doubleInfElem",
+                     Double.NEGATIVE_INFINITY, foo.getDoubleInfElem(), 0D);
         assertEquals("Unexpected value for element byteElem",
                      (byte)18, foo.getByteElem().byteValue());
         

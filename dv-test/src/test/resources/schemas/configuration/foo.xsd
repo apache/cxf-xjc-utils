@@ -55,6 +55,7 @@
             <xs:element name="driving" type="tns:drivingDecision" default="LeftTurn" minOccurs="0"></xs:element>
             <xs:element name="StringElem" type="xs:string" default="hello" minOccurs="0"></xs:element>
             <xs:element name="BooleanElem" type="xs:boolean" default="true" minOccurs="0"></xs:element>
+            <xs:element name="booleanNumericElem" type="xs:boolean" default="1" minOccurs="0"></xs:element>
             <xs:element name="IntegerElem" type="xs:integer" default="11" minOccurs="0"></xs:element>
             <xs:element name="intElem" type="xs:int" default="12" minOccurs="0"></xs:element>
             <xs:element name="longElem" type="xs:long" default="13" minOccurs="0"></xs:element>
@@ -62,6 +63,8 @@
             <xs:element name="decimalElem" type="xs:decimal" default="15" minOccurs="0"></xs:element>
             <xs:element name="floatElem" type="xs:float" default="16" minOccurs="0"></xs:element>
             <xs:element name="doubleElem" type="xs:double" default="17" minOccurs="0"></xs:element>
+            <xs:element name="floatNaNElem" type="xs:float" default="NaN" minOccurs="0"></xs:element>
+            <xs:element name="doubleInfElem" type="xs:double" default="-INF" minOccurs="0"></xs:element>
             <xs:element name="byteElem" type="xs:byte" default="18" minOccurs="0"></xs:element>
             <xs:element name="qnameElem" type="xs:QName" default="xs:string" minOccurs="0"></xs:element>
             <xs:element name="base64BinaryElem" type="xs:base64Binary" default="abcdefgh" minOccurs="0"></xs:element>
@@ -89,6 +92,7 @@
 
         <xs:attribute name="stringAttr" type="xs:string" default="hello"/>
         <xs:attribute name="booleanAttr" type="xs:boolean" default="true"/>
+        <xs:attribute name="booleanNumericAttr" type="xs:boolean" default="1"/>
         <xs:attribute name="integerAttr" type="xs:integer" default="111"/>
         <xs:attribute name="intAttr" type="xs:int" default="112"/>
         <xs:attribute name="longAttr" type="xs:long" default="113"/>
@@ -96,6 +100,8 @@
         <xs:attribute name="decimalAttr" type="xs:decimal" default="115"/>
         <xs:attribute name="floatAttr" type="xs:float" default="116"/>
         <xs:attribute name="doubleAttr" type="xs:double" default="117"/>
+        <xs:attribute name="floatInfAttr" type="xs:float" default="INF"/>
+        <xs:attribute name="doubleNaNAttr" type="xs:double" default="NaN"/>
         <xs:attribute name="byteAttr" type="xs:byte" default="118"/>
         <xs:attribute name="qnameAttr" type="xs:QName" default="xs:schema"/>
         <xs:attribute name="base64BinaryAttr" type="xs:base64Binary" default="wxyz"/>

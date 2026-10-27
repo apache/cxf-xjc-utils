@@ -426,17 +426,19 @@ public class DefaultValuePlugin {
 
         JExpression dv = null;
         
+        // booleans and floating point values are parsed as defined by XML Schema, which allows
+        // e.g. "1" for true and "INF" or "NaN" for a double, unlike Boolean or Double.parseDouble
         if ("java.lang.Boolean".equals(typeName) && isElement) {
-            dv = JExpr.direct(Boolean.valueOf(defaultValue) ? "Boolean.TRUE" : "Boolean.FALSE");
+            dv = JExpr.direct(DatatypeConverter.parseBoolean(defaultValue) ? "Boolean.TRUE" : "Boolean.FALSE");
         } else if ("java.lang.Byte".equals(typeName) && isElement) {
             dv = ((JClass) type).staticInvoke("valueOf")
                 .arg(JExpr.cast(type.unboxify(), JExpr.lit(Byte.parseByte(defaultValue))));
         } else if ("java.lang.Double".equals(typeName) && isElement) {
             dv = ((JClass) type).staticInvoke("valueOf")
-                .arg(JExpr.lit(Double.parseDouble(defaultValue)));
+                .arg(JExpr.lit(DatatypeConverter.parseDouble(defaultValue)));
         } else if ("java.lang.Float".equals(typeName) && isElement) {
             dv = ((JClass) type).staticInvoke("valueOf")
-                .arg(JExpr.lit(Float.parseFloat(defaultValue)));
+                .arg(JExpr.lit(DatatypeConverter.parseFloat(defaultValue)));
         } else if ("java.lang.Integer".equals(typeName) && isElement) {
             dv = ((JClass) type).staticInvoke("valueOf")
                 .arg(JExpr.lit(Integer.parseInt(defaultValue)));
@@ -486,11 +488,11 @@ public class DefaultValuePlugin {
             } else if ("short".equals(typeName)) {
                 dv = JExpr.lit(Short.parseShort(defaultValue));
             } else if ("boolean".equals(typeName)) {
-                dv = JExpr.lit(Boolean.parseBoolean(defaultValue));
+                dv = JExpr.lit(DatatypeConverter.parseBoolean(defaultValue));
             } else if ("double".equals(typeName)) {
-                dv = JExpr.lit(Double.parseDouble(defaultValue));
+                dv = JExpr.lit(DatatypeConverter.parseDouble(defaultValue));
             } else if ("float".equals(typeName)) {
-                dv = JExpr.lit(Float.parseFloat(defaultValue));
+                dv = JExpr.lit(DatatypeConverter.parseFloat(defaultValue));
             } else if ("byte".equals(typeName)) {
                 dv = JExpr.lit(Byte.parseByte(defaultValue));
             } else {
