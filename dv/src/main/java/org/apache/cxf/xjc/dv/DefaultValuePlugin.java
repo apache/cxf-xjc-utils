@@ -513,13 +513,9 @@ public class DefaultValuePlugin {
                               boolean remapRet) {
 
         String fieldName = fo.getPropertyInfo().getName(false);
-        JType type = fo.getRawType();
-        String typeName = type.fullName();
 
-        String getterName = ("java.lang.Boolean".equals(typeName) ? "is" : "get")
-                            + fo.getPropertyInfo().getName(true);
-
-        JMethod method = dc.getMethod(getterName, new JType[0]);
+        JMethod method = getGetter(fo, dc);
+        String getterName = method.name();
         JDocComment doc = method.javadoc();
         int mods = method.mods().getValue();
         JType mtype = method.type();
@@ -544,16 +540,25 @@ public class DefaultValuePlugin {
         }
         method.body()._return(fr);
     }
+    /*
+     * The getter of a Boolean is isXXX(), except with -enableIntrospection, where it is getXXX()
+     */
+    private static JMethod getGetter(FieldOutline fo, JDefinedClass dc) {
+        String name = fo.getPropertyInfo().getName(true);
+        boolean isBoolean = "java.lang.Boolean".equals(fo.getRawType().fullName());
+        JMethod method = dc.getMethod((isBoolean ? "is" : "get") + name, new JType[0]);
+        if (method == null && isBoolean) {
+            method = dc.getMethod("get" + name, new JType[0]);
+        }
+        return method;
+    }
+
     private void updateSetter(ClassOutline co, FieldOutline fo, 
                               JDefinedClass dc) {
 
         String fieldName = fo.getPropertyInfo().getName(false);
-        JType type = fo.getRawType();
-        String typeName = type.fullName();
 
-        String getterName = ("java.lang.Boolean".equals(typeName) ? "is" : "get")
-                            + fo.getPropertyInfo().getName(true);
-        JMethod method = dc.getMethod(getterName, new JType[0]);
+        JMethod method = getGetter(fo, dc);
         JType mtype = method.type();
         String setterName = "set" + fo.getPropertyInfo().getName(true);
         method = dc.getMethod(setterName, new JType[] {mtype});
