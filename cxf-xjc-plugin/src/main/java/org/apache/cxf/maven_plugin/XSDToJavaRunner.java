@@ -272,7 +272,7 @@ public class XSDToJavaRunner {
                 CodeWriter cw = opt.createCodeWriter();
                 model.codeModel.build(cw);
             } catch (IOException e) {
-                listener.error(e);
+                listener.error("Failed to write generated code", e);
                 return -1;
             }
         }
